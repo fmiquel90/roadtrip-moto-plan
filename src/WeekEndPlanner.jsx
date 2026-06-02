@@ -19,6 +19,23 @@ const C = {
 /* Wikipedia Commons base */
 const WI = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
 
+/* ─── Dates & hotel links ────────────────────────────────────── */
+const weekendDates = {
+  '4-5-juil':   { checkin:'2026-07-04', checkout:'2026-07-05', label:'Sam 4 → Dim 5 juillet 2026' },
+  '11-12-juil': { checkin:'2026-07-11', checkout:'2026-07-12', label:'Sam 11 → Dim 12 juillet 2026' },
+  '18-19-juil': { checkin:'2026-07-18', checkout:'2026-07-19', label:'Sam 18 → Dim 19 juillet 2026' },
+  '22-23-aou':  { checkin:'2026-08-22', checkout:'2026-08-23', label:'Sam 22 → Dim 23 août 2026' },
+  '12-13-sep':  { checkin:'2026-09-12', checkout:'2026-09-13', label:'Sam 12 → Dim 13 septembre 2026' },
+};
+const hotelCity = {
+  vannes:'Vannes', labaule:'La+Baule', bayeux:'Bayeux', morgat:'Crozon', huelgoat:'Huelgoat',
+};
+const bookingUrl = (hotelKey, weekend) => {
+  const city = hotelCity[hotelKey] || hotelKey;
+  const { checkin, checkout } = weekendDates[weekend];
+  return `https://www.booking.com/searchresults.fr.html?ss=${city}%2C+France&checkin=${checkin}&checkout=${checkout}&group_adults=2&no_rooms=1&nflt=ht_id%3D204`;
+};
+
 /* ─── Data ───────────────────────────────────────────────────── */
 const weekends = {
   '4-5-juil':  { label:'4–5 Juil',   season:'Début saison',  bayeux:[80,90],  vannes:[90,110],  labaule:[90,120],  huelgoat:[70,110],  morgat:[65,95],  note:'✅ Bons prix',   tone:'good' },
@@ -50,6 +67,8 @@ const routes = {
       { url:`${WI}/a/a3/4748.1099_Menhire%2C_bis_zu_4_Meter_hoch%2C_von_OstnachWest_in_1167_Meter_Langen_Alignements_%28Granit-Steinreihen%29_in_einem_Halbkreis_endend_Le_M%C3%A9nec%2C_Carnac%2C_Departement_Morbihan%2C_Bretagne_Steffen_Heilfort.jpg/330px-thumbnail.jpg`, caption:'Menhirs de Carnac', location:'Carnac' },
       { url:`${WI}/6/65/Pointe_de_Pen-Hir.JPG/330px-Pointe_de_Pen-Hir.JPG`, caption:'Pointe de Pen-Hir', location:'Crozon, Finistère' },
       { url:`${WI}/1/1a/Dinan_Saint-Sauveur_vue_des_remparts.jpg/330px-Dinan_Saint-Sauveur_vue_des_remparts.jpg`, caption:'Remparts de Dinan', location:'Dinan' },
+      { url:`${WI}/6/69/ArGerveur.jpg/330px-ArGerveur.jpg`, caption:'Belle-Île-en-Mer', location:'Au large du Morbihan' },
+      { url:`${WI}/d/d3/Auray_mairie.jpg/330px-Auray_mairie.jpg`, caption:'Port de Saint-Goustan', location:'Auray' },
     ],
   },
   vendee: {
@@ -73,6 +92,8 @@ const routes = {
       { url:`${WI}/8/8b/St_Michel_Gu%C3%A9rande.JPG/330px-St_Michel_Gu%C3%A9rande.JPG`, caption:'Guérande médiévale', location:'Guérande' },
       { url:`${WI}/6/66/Marais_salants.jpg/330px-Marais_salants.jpg`, caption:'Marais salants', location:'Presqu\'île guérandaise' },
       { url:`${WI}/3/3c/Vue_pont_st_nazaire_loire.JPG/330px-Vue_pont_st_nazaire_loire.JPG`, caption:'Pont de Saint-Nazaire', location:'Estuaire de Loire' },
+      { url:`${WI}/c/c8/Nantes_a%C3%A9rien_ch%C3%A2teau3.jpg/330px-Nantes_a%C3%A9rien_ch%C3%A2teau3.jpg`, caption:'Château des Ducs', location:'Nantes' },
+      { url:`${WI}/e/e7/Saint-Nazaire.jpg/330px-Saint-Nazaire.jpg`, caption:'Saint-Nazaire', location:'Estuaire de Loire' },
     ],
   },
   normandie: {
@@ -96,6 +117,8 @@ const routes = {
       { url:`${WI}/6/60/Normandy_American_Cemetery.png/330px-Normandy_American_Cemetery.png`, caption:'Cimetière Américain', location:'Colleville-sur-Mer' },
       { url:`${WI}/9/9b/Bayeux_centre.jpg/330px-Bayeux_centre.jpg`, caption:'Centre de Bayeux', location:'Bayeux' },
       { url:`${WI}/4/4f/Pointeduhoc1.jpg/330px-Pointeduhoc1.jpg`, caption:'Pointe du Hoc', location:'Cricqueville-en-Bessin' },
+      { url:`${WI}/1/17/Arromanches-les-Bains_%C3%A0_mar%C3%A9e_basse_%28juillet_2025%29.JPG/330px-Arromanches-les-Bains_%C3%A0_mar%C3%A9e_basse_%28juillet_2025%29.JPG`, caption:'Arromanches à marée basse', location:'Arromanches' },
+      { url:`${WI}/9/9c/Odo_bayeux_tapestry.png/330px-Odo_bayeux_tapestry.png`, caption:'Tapisserie de Bayeux', location:'Bayeux (XIe s.)' },
     ],
   },
   finistere: {
@@ -119,6 +142,8 @@ const routes = {
       { url:`${WI}/4/4e/Tas_de_Pois%2C_Pen_Hir%2C_Finist%C3%A8re.jpg/330px-Tas_de_Pois%2C_Pen_Hir%2C_Finist%C3%A8re.jpg`, caption:'Tas de Pois, Pen-Hir', location:'Presqu\'île de Crozon' },
       { url:`${WI}/2/2b/Le_port_de_Morgat_-_001.JPG/330px-Le_port_de_Morgat_-_001.JPG`, caption:'Port de Morgat', location:'Morgat, Crozon' },
       { url:`${WI}/4/4e/Crozon_cap_de_la_Ch%C3%A8vre_Bretagne_France.jpg/330px-Crozon_cap_de_la_Ch%C3%A8vre_Bretagne_France.jpg`, caption:'Cap de la Chèvre', location:'Crozon' },
+      { url:`${WI}/2/24/Port_Douarnenez.JPG/330px-Port_Douarnenez.JPG`, caption:'Port de Douarnenez', location:'Douarnenez' },
+      { url:`${WI}/1/13/Chateaulin_1.jpg/330px-Chateaulin_1.jpg`, caption:'Châteaulin', location:'Aulne maritime' },
     ],
   },
   montsArree: {
@@ -142,6 +167,8 @@ const routes = {
       { url:`${WI}/d/dc/Huelgoat_Chaos_mill.jpg/330px-Huelgoat_Chaos_mill.jpg`, caption:'Chaos du Moulin', location:'Huelgoat' },
       { url:`${WI}/0/0c/1_Thegonnec_C.jpg/330px-1_Thegonnec_C.jpg`, caption:'Enclos paroissial', location:'Saint-Thégonnec' },
       { url:`${WI}/7/72/Vue_de_Morlaix.JPG/330px-Vue_de_Morlaix.JPG`, caption:'Viaduc de Morlaix', location:'Morlaix' },
+      { url:`${WI}/0/0e/Brasparts_24_perch%C3%A9_sur_une_colline_-vue_depuis_la_route_du_Faou-.JPG/330px-Brasparts_24_perch%C3%A9_sur_une_colline_-vue_depuis_la_route_du_Faou-.JPG`, caption:'Brasparts', location:'Monts d\'Arrée' },
+      { url:`${WI}/8/8f/Kloz_iliz_Pleiben.jpg/330px-Kloz_iliz_Pleiben.jpg`, caption:'Enclos de Pleyben', location:'Pleyben' },
     ],
   },
 };
@@ -381,6 +408,28 @@ export default function WeekEndPlanner() {
         </div>
       </div>
 
+      {/* Hotel booking */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Réserver</Label>
+        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10 }}>
+            <span style={{ fontSize:10, color:C.muted, fontFamily:C.mono }}>📅 {weekendDates[selectedWeekend].label}</span>
+          </div>
+          <a href={bookingUrl(route.hotelKey, selectedWeekend)} target="_blank" rel="noopener noreferrer"
+            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8,
+              padding:'9px 12px', borderRadius:8, background:'#003580', color:'#fff',
+              fontSize:12, fontWeight:600, textDecoration:'none', cursor:'pointer' }}
+            onMouseEnter={e=>e.currentTarget.style.background='#00224f'}
+            onMouseLeave={e=>e.currentTarget.style.background='#003580'}>
+            <span>🏨 Hôtels à {route.hotelName.split(' ')[0]}</span>
+            <ExternalLink size={11} style={{ opacity:0.7, flexShrink:0 }} />
+          </a>
+          <div style={{ fontSize:9, color:C.faint, marginTop:6, fontFamily:C.mono, letterSpacing:'0.1em' }}>
+            VIA BOOKING.COM · {hp[0]}–{hp[1]}€ ESTIMÉ/NUIT
+          </div>
+        </div>
+      </div>
+
       {/* Highlights */}
       <div style={{ marginBottom:16 }}>
         <Label>Points forts</Label>
@@ -433,8 +482,9 @@ export default function WeekEndPlanner() {
         * { box-sizing:border-box; }
         .gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
         .gallery-card:hover img { transform:scale(1.08); }
+        @media (min-width:768px)  { .gallery-grid { grid-template-columns:repeat(3,1fr); gap:10px; } }
         @media (min-width:1024px) {
-          .gallery-grid { grid-template-columns:repeat(4,1fr); gap:10px; }
+          .gallery-grid { grid-template-columns:repeat(3,1fr); gap:10px; }
           .lg-sidebar  { display:flex !important; }
           .mobile-only { display:none !important; }
           .main-scroll { height:100vh; overflow-y:auto; }
