@@ -1,374 +1,514 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Navigation, Clock, Wallet } from 'lucide-react';
+import React, { useState } from 'react';
+import { MapPin, ExternalLink, Camera, Navigation, Clock, Wallet, Map } from 'lucide-react';
 
+/* ─── Design tokens ─────────────────────────────────────────── */
+const C = {
+  bg:      '#07090d',
+  sidebar: '#050709',
+  surface: '#0d1117',
+  border:  '#161d28',
+  borderHi:'#1f2e3f',
+  text:    '#c4cfd8',
+  muted:   '#3d5263',
+  faint:   '#111a25',
+  mono:    "'Syne Mono', monospace",
+  display: "'Bebas Neue', sans-serif",
+  sans:    "'Outfit', sans-serif",
+};
+
+/* Wikipedia Commons base */
+const WI = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
+
+/* ─── Data ───────────────────────────────────────────────────── */
 const weekends = {
-  '4-5-juil': { label: '4-5 Juillet', season: 'Début saison', bayeux: [80, 90], vannes: [90, 110], rochelle: [100, 130], note: '✅ Bons prix', tone: 'good' },
-  '11-12-juil': { label: '11-12 Juillet', season: 'Francofolies', bayeux: [85, 100], vannes: [100, 120], rochelle: [140, 180], note: '⚠️ Cher', tone: 'warn' },
-  '18-19-juil': { label: '18-19 Juillet', season: 'Pic estival', bayeux: [90, 110], vannes: [110, 130], rochelle: [120, 150], note: '⚠️ Touristique', tone: 'warn' },
-  '22-23-aou': { label: '22-23 Août', season: 'Post-estival', bayeux: [75, 90], vannes: [85, 100], rochelle: [95, 120], note: '✅ Bons prix', tone: 'good' },
-  '12-13-sep': { label: '12-13 Septembre', season: 'Basse saison', bayeux: [55, 70], vannes: [60, 75], rochelle: [70, 90], note: '✅✅ Top prix', tone: 'best' }
+  '4-5-juil':  { label:'4–5 Juil',   season:'Début saison',  bayeux:[80,90],  vannes:[90,110],  rochelle:[100,130], huelgoat:[70,110],  note:'✅ Bons prix',   tone:'good' },
+  '11-12-juil':{ label:'11–12 Juil', season:'Francofolies',  bayeux:[85,100], vannes:[100,120], rochelle:[140,180], huelgoat:[80,120],  note:'⚠️ Cher',         tone:'warn' },
+  '18-19-juil':{ label:'18–19 Juil', season:'Pic estival',   bayeux:[90,110], vannes:[110,130], rochelle:[120,150], huelgoat:[90,130],  note:'⚠️ Touristique',  tone:'warn' },
+  '22-23-aou': { label:'22–23 Août', season:'Post-estival',  bayeux:[75,90],  vannes:[85,100],  rochelle:[95,120],  huelgoat:[75,110],  note:'✅ Bons prix',   tone:'good' },
+  '12-13-sep': { label:'12–13 Sep',  season:'Basse saison',  bayeux:[55,70],  vannes:[60,75],   rochelle:[70,90],   huelgoat:[55,75],   note:'✅✅ Top prix',  tone:'best' },
 };
 
 const routes = {
   morbihan: {
-    title: 'Golfe du Morbihan',
-    shortTitle: 'Morbihan',
-    subtitle: 'Côte bretonne authentique',
-    color: '#06b6d4',
-    colorDark: '#0891b2',
-    distance: '320 km',
-    driveTime: '7h30 total',
-    hotelKey: 'vannes',
-    hotelName: 'Vannes centre',
-    center: [48.1, -2.6],
-    zoom: 8,
-    waypoints: [
-      { name: 'Fréhel', coords: [48.68, -2.32], type: 'start', day: 'Départ' },
-      { name: 'Dinan', coords: [48.46, -2.05], type: 'stop', day: 'Sam midi' },
-      { name: 'Vannes', coords: [47.66, -2.76], type: 'sleep', day: 'Sam soir 🛏' },
-      { name: 'Carnac', coords: [47.58, -3.08], type: 'stop', day: 'Dim matin' },
-      { name: 'Auray', coords: [47.66, -2.98], type: 'stop', day: 'Dim midi' },
-      { name: 'Fréhel', coords: [48.68, -2.32], type: 'end', day: 'Dim soir' }
+    title:'Golfe du Morbihan', shortTitle:'Morbihan',
+    subtitle:'Côte bretonne authentique',
+    color:'#22d3ee', colorDark:'#06b6d4',
+    distance:'320 km', driveTime:'7h30',
+    hotelKey:'vannes', hotelName:'Vannes centre',
+    googleMapsUrl:'https://www.google.com/maps/dir/Cap+Frehel+22240/Dinan+22100/Vannes+56000/Carnac+56340/Auray+56400/Cap+Frehel+22240',
+    waypoints:[
+      { name:'Fréhel',  type:'start', day:'Départ' },
+      { name:'Dinan',   type:'stop',  day:'Sam midi' },
+      { name:'Vannes',  type:'sleep', day:'Sam soir' },
+      { name:'Carnac',  type:'stop',  day:'Dim matin' },
+      { name:'Auray',   type:'stop',  day:'Dim midi' },
+      { name:'Fréhel',  type:'end',   day:'Dim soir' },
     ],
-    highlights: ['🌊 Côte bretonne authentique', '🏍️ Routes D768/D34 sinueuses', '⚓ Ferry possible vers les îles', '🏛 Menhirs de Carnac']
+    highlights:['🌊 Côte bretonne & golfe sauvage','🏍️ Routes D768/D34 sinueuses','⚓ Ferry possible vers les îles','🏛 Menhirs de Carnac (UNESCO)'],
+    images:[
+      { url:`${WI}/4/4c/Cromlech_d%27Er_Lannic_et_cairn_de_Gavrinis_par_drone_-_vue_2.jpg/330px-Cromlech_d%27Er_Lannic_et_cairn_de_Gavrinis_par_drone_-_vue_2.jpg`, caption:'Golfe du Morbihan', location:'Vue drone' },
+      { url:`${WI}/a/a3/4748.1099_Menhire%2C_bis_zu_4_Meter_hoch%2C_von_OstnachWest_in_1167_Meter_Langen_Alignements_%28Granit-Steinreihen%29_in_einem_Halbkreis_endend_Le_M%C3%A9nec%2C_Carnac%2C_Departement_Morbihan%2C_Bretagne_Steffen_Heilfort.jpg/330px-thumbnail.jpg`, caption:'Menhirs de Carnac', location:'Carnac' },
+      { url:`${WI}/6/65/Pointe_de_Pen-Hir.JPG/330px-Pointe_de_Pen-Hir.JPG`, caption:'Pointe de Pen-Hir', location:'Crozon, Finistère' },
+      { url:`${WI}/1/1a/Dinan_Saint-Sauveur_vue_des_remparts.jpg/330px-Dinan_Saint-Sauveur_vue_des_remparts.jpg`, caption:'Remparts de Dinan', location:'Dinan' },
+    ],
   },
   vendee: {
-    title: 'Vendée Côtière',
-    shortTitle: 'Vendée',
-    subtitle: 'La Rochelle & plages atlantiques',
-    color: '#f59e0b',
-    colorDark: '#d97706',
-    distance: '440 km',
-    driveTime: '8h30 total',
-    hotelKey: 'rochelle',
-    hotelName: 'La Rochelle',
-    center: [47.4, -1.9],
-    zoom: 7,
-    waypoints: [
-      { name: 'Fréhel', coords: [48.68, -2.32], type: 'start', day: 'Départ' },
-      { name: 'Vannes', coords: [47.66, -2.76], type: 'stop', day: 'Sam midi' },
-      { name: 'La Rochelle', coords: [46.16, -1.15], type: 'sleep', day: 'Sam soir 🛏' },
-      { name: 'Île de Ré', coords: [46.20, -1.37], type: 'stop', day: 'Dim matin' },
-      { name: 'Fontenay-le-Comte', coords: [46.47, -0.80], type: 'stop', day: 'Dim aprem' },
-      { name: 'Fréhel', coords: [48.68, -2.32], type: 'end', day: 'Dim soir' }
+    title:'Vendée Côtière', shortTitle:'Vendée',
+    subtitle:'La Rochelle & atlantique',
+    color:'#fbbf24', colorDark:'#f59e0b',
+    distance:'440 km', driveTime:'8h30',
+    hotelKey:'rochelle', hotelName:'La Rochelle',
+    googleMapsUrl:'https://www.google.com/maps/dir/Cap+Frehel+22240/Vannes+56000/La+Rochelle+17000/Ile+de+Re+17000/Fontenay-le-Comte+85200/Cap+Frehel+22240',
+    waypoints:[
+      { name:'Fréhel',            type:'start', day:'Départ' },
+      { name:'Vannes',            type:'stop',  day:'Sam midi' },
+      { name:'La Rochelle',       type:'sleep', day:'Sam soir' },
+      { name:'Île de Ré',         type:'stop',  day:'Dim matin' },
+      { name:'Fontenay-le-Comte', type:'stop',  day:'Dim aprem' },
+      { name:'Fréhel',            type:'end',   day:'Dim soir' },
     ],
-    highlights: ['🌅 Plages longues & sauvages', '🏰 La Rochelle portuaire', '🌉 Île de Ré sublime', '🏍️ Routes variées (intérieur + côte)']
+    highlights:['🌅 Plages longues & sauvages','🏰 La Rochelle portuaire','🌉 Île de Ré & son pont','🏍️ Routes intérieur + côte'],
+    images:[
+      { url:`${WI}/d/d8/Ile-de-Re_vue_du_ciel.JPG/330px-Ile-de-Re_vue_du_ciel.JPG`, caption:'Île de Ré', location:'Vue aérienne' },
+      { url:`${WI}/2/22/Entree_vieux_port_La_Rochelle.JPG/330px-Entree_vieux_port_La_Rochelle.JPG`, caption:'Vieux-Port', location:'La Rochelle' },
+      { url:`${WI}/d/d4/MaraisPoitevin.jpg/330px-MaraisPoitevin.jpg`, caption:'Marais Poitevin', location:'Marais Poitevin' },
+      { url:`${WI}/4/40/Noirmoutier_Island_SPOT_1275.jpg/330px-Noirmoutier_Island_SPOT_1275.jpg`, caption:'Île de Noirmoutier', location:'Vendée' },
+    ],
   },
   normandie: {
-    title: 'Normandie D-Day',
-    shortTitle: 'Normandie',
-    subtitle: 'Bayeux & route D514 mythique',
-    color: '#10b981',
-    colorDark: '#059669',
-    distance: '330 km',
-    driveTime: '7h30 total',
-    hotelKey: 'bayeux',
-    hotelName: 'ibis budget Bayeux',
-    center: [49.0, -1.5],
-    zoom: 8,
-    waypoints: [
-      { name: 'Fréhel', coords: [48.68, -2.32], type: 'start', day: 'Départ' },
-      { name: 'Bayeux', coords: [49.27, -0.70], type: 'sleep', day: 'Sam soir 🛏' },
-      { name: 'Cimetière US', coords: [49.36, -0.85], type: 'stop', day: 'Dim matin' },
-      { name: 'Omaha Beach', coords: [49.37, -0.88], type: 'stop', day: 'Dim matin' },
-      { name: 'Vierville-sur-Mer', coords: [49.38, -0.90], type: 'stop', day: 'Dim midi' },
-      { name: 'Fréhel', coords: [48.68, -2.32], type: 'end', day: 'Dim soir' }
+    title:'Normandie D-Day', shortTitle:'Normandie',
+    subtitle:'Bayeux & route D514',
+    color:'#34d399', colorDark:'#10b981',
+    distance:'330 km', driveTime:'7h30',
+    hotelKey:'bayeux', hotelName:'ibis budget Bayeux',
+    googleMapsUrl:'https://www.google.com/maps/dir/Cap+Frehel+22240/Bayeux+14400/Colleville-sur-Mer+14710/Omaha+Beach/Vierville-sur-Mer+14710/Cap+Frehel+22240',
+    waypoints:[
+      { name:'Fréhel',          type:'start', day:'Départ' },
+      { name:'Bayeux',          type:'sleep', day:'Sam soir' },
+      { name:'Cimetière US',    type:'stop',  day:'Dim matin' },
+      { name:'Omaha Beach',     type:'stop',  day:'Dim matin' },
+      { name:'Vierville-s-Mer', type:'stop',  day:'Dim midi' },
+      { name:'Fréhel',          type:'end',   day:'Dim soir' },
     ],
-    highlights: ['🛣 Route D514 légendaire', '🪦 Cimetière américain émouvant', '🌊 Omaha Beach historique', '💰 Meilleur rapport qualité/prix']
-  }
+    highlights:['🛣 Route D514 légendaire','🪦 Cimetière américain émouvant','🌊 Omaha Beach historique','💰 Meilleur rapport qualité/prix'],
+    images:[
+      { url:`${WI}/7/75/Seconde-guerre-mondiale-debarquement-LCVP-6juin1944.jpg/330px-Seconde-guerre-mondiale-debarquement-LCVP-6juin1944.jpg`, caption:'Débarquement du 6 juin', location:'Omaha Beach' },
+      { url:`${WI}/6/60/Normandy_American_Cemetery.png/330px-Normandy_American_Cemetery.png`, caption:'Cimetière Américain', location:'Colleville-sur-Mer' },
+      { url:`${WI}/9/9b/Bayeux_centre.jpg/330px-Bayeux_centre.jpg`, caption:'Centre de Bayeux', location:'Bayeux' },
+      { url:`${WI}/4/4f/Pointeduhoc1.jpg/330px-Pointeduhoc1.jpg`, caption:'Pointe du Hoc', location:'Cricqueville-en-Bessin' },
+    ],
+  },
+  montsArree: {
+    title:"Monts d'Arrée", shortTitle:"Arrée",
+    subtitle:'Landes sauvages & chaos celtique',
+    color:'#c084fc', colorDark:'#a855f7',
+    distance:'460 km', driveTime:'9h00',
+    hotelKey:'huelgoat', hotelName:'Huelgoat / Carhaix',
+    googleMapsUrl:'https://www.google.com/maps/dir/Cap+Frehel+22240/Corlay+22320/Huelgoat+29690/Brasparts+29190/Morlaix+29600/Cap+Frehel+22240',
+    waypoints:[
+      { name:'Fréhel',    type:'start', day:'Départ' },
+      { name:'Corlay',    type:'stop',  day:'Sam midi' },
+      { name:'Huelgoat',  type:'sleep', day:'Sam soir' },
+      { name:'Brasparts', type:'stop',  day:'Dim matin' },
+      { name:'Morlaix',   type:'stop',  day:'Dim midi' },
+      { name:'Fréhel',    type:'end',   day:'Dim soir' },
+    ],
+    highlights:["🌿 Landes bretonnes immenses & sauvages","🧗 Chaos granitique de Huelgoat","🌫️ Yeun Elez, la « Porte de l'Enfer »","⛪ Enclos paroissiaux du Finistère (D785)"],
+    images:[
+      { url:`${WI}/e/ec/Landes_de_Bretagne.jpg/330px-Landes_de_Bretagne.jpg`, caption:'Landes de Bretagne', location:"Monts d'Arrée" },
+      { url:`${WI}/d/dc/Huelgoat_Chaos_mill.jpg/330px-Huelgoat_Chaos_mill.jpg`, caption:'Chaos du Moulin', location:'Huelgoat' },
+      { url:`${WI}/0/0c/1_Thegonnec_C.jpg/330px-1_Thegonnec_C.jpg`, caption:'Enclos paroissial', location:'Saint-Thégonnec' },
+      { url:`${WI}/7/72/Vue_de_Morlaix.JPG/330px-Vue_de_Morlaix.JPG`, caption:'Viaduc de Morlaix', location:'Morlaix' },
+    ],
+  },
 };
 
+/* ─── Helpers ────────────────────────────────────────────────── */
+const noteColor = t => t==='best'?'#22c55e':t==='warn'?'#f59e0b':'#3d5263';
+
+const Label = ({ children, style }) => (
+  <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.18em', color:C.muted, textTransform:'uppercase', marginBottom:8, ...style }}>
+    {children}
+  </div>
+);
+
+/* ─── Route Banner (replaces map) ───────────────────────────── */
+const RouteBanner = ({ route, data }) => {
+  const wps = route.waypoints;
+  return (
+    <div style={{
+      background:`linear-gradient(160deg, ${route.color}12 0%, ${C.faint} 60%, ${C.bg} 100%)`,
+      borderBottom:`1px solid ${C.border}`,
+      padding:'28px 24px 24px',
+    }}>
+      {/* Route name + stats */}
+      <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:16, marginBottom:24, flexWrap:'wrap' }}>
+        <div>
+          <div style={{ fontFamily:C.display, fontSize:'clamp(2rem, 4vw, 3.2rem)', color:route.color,
+            lineHeight:1, letterSpacing:'0.04em', textShadow:`0 0 40px ${route.color}40` }}>
+            {route.title}
+          </div>
+          <div style={{ fontSize:12, color:'#7a8fa0', marginTop:4, fontFamily:C.sans }}>{route.subtitle}</div>
+        </div>
+        <div style={{ display:'flex', gap:16, alignItems:'center', flexShrink:0 }}>
+          <div style={{ textAlign:'right' }}>
+            <div style={{ fontFamily:C.mono, fontSize:'1.4rem', color:route.color, lineHeight:1 }}>
+              {route.distance}
+            </div>
+            <div style={{ fontFamily:C.mono, fontSize:8, letterSpacing:'0.18em', color:C.muted, marginTop:2 }}>DISTANCE</div>
+          </div>
+          <div style={{ width:1, height:32, background:C.border }} />
+          <div>
+            <div style={{ fontFamily:C.mono, fontSize:'1.4rem', color:route.color, lineHeight:1 }}>
+              {route.driveTime}
+            </div>
+            <div style={{ fontFamily:C.mono, fontSize:8, letterSpacing:'0.18em', color:C.muted, marginTop:2 }}>DURÉE</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Visual waypoints strip */}
+      <div style={{ overflowX:'auto', paddingBottom:4 }}>
+        <div style={{ display:'flex', alignItems:'flex-start', minWidth:'max-content', gap:0 }}>
+          {wps.map((wp, i) => {
+            const isStart = wp.type==='start';
+            const isEnd   = wp.type==='end';
+            const isSleep = wp.type==='sleep';
+            const dotCol  = (isStart||isEnd) ? '#ef4444' : isSleep ? route.color : C.borderHi;
+            const isLast  = i === wps.length-1;
+            return (
+              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:0 }}>
+                {/* Dot + label */}
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
+                  <div style={{
+                    width: isSleep?11:8, height: isSleep?11:8, borderRadius:'50%',
+                    background:dotCol, marginTop:2, flexShrink:0,
+                    boxShadow: isSleep?`0 0 10px ${route.color}90`:'none',
+                    border: isSleep?`2px solid ${route.color}60`:'none',
+                  }} />
+                  <div style={{ textAlign:'center' }}>
+                    <div style={{ fontSize:10, color: isSleep?route.color:(isStart||isEnd)?'#ef4444':C.text,
+                      fontWeight: isSleep?600:400, whiteSpace:'nowrap', lineHeight:1.2 }}>
+                      {wp.name}
+                    </div>
+                    <div style={{ fontFamily:C.mono, fontSize:8, color:C.muted, marginTop:2, whiteSpace:'nowrap' }}>
+                      {wp.day}
+                    </div>
+                  </div>
+                </div>
+                {/* Connector line */}
+                {!isLast && (
+                  <div style={{ display:'flex', alignItems:'center', height:10, marginTop:3, marginLeft:-1 }}>
+                    <div style={{ height:1.5, width:40, background:`linear-gradient(to right, ${dotCol}60, ${C.borderHi}60)` }} />
+                    <div style={{ width:3, height:3, borderTop:`1.5px solid ${C.borderHi}60`, borderRight:`1.5px solid ${C.borderHi}60`, transform:'rotate(45deg)', marginLeft:-2 }} />
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Google Maps CTA */}
+      <div style={{ marginTop:20 }}>
+        <a
+          href={route.googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display:'inline-flex', alignItems:'center', gap:10,
+            padding:'13px 22px', borderRadius:12,
+            background:route.color, color:C.bg,
+            fontFamily:C.sans, fontSize:14, fontWeight:700,
+            cursor:'pointer', textDecoration:'none',
+            boxShadow:`0 4px 24px ${route.color}50`,
+            transition:'all 0.2s',
+          }}
+          onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; e.currentTarget.style.boxShadow=`0 6px 32px ${route.color}70`; }}
+          onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=`0 4px 24px ${route.color}50`; }}
+        >
+          <Map size={16} />
+          Ouvrir l'itinéraire dans Google Maps
+          <ExternalLink size={13} style={{ opacity:0.7 }} />
+        </a>
+        <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em' }}>
+          NAVIGATION GPS COMPLÈTE · TOUTES ÉTAPES INCLUSES
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── Gallery ────────────────────────────────────────────────── */
+const Gallery = ({ route }) => (
+  <div style={{ padding:'20px 20px 28px' }}>
+    <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:14 }}>
+      <Camera size={11} style={{ color:C.muted }} />
+      <Label style={{ marginBottom:0 }}>Ce que vous verrez</Label>
+    </div>
+    <div className="gallery-grid">
+      {route.images.map((img, i) => (
+        <div key={i} className="gallery-card"
+          style={{ position:'relative', borderRadius:10, overflow:'hidden', aspectRatio:'4/3', background:`${route.color}15` }}>
+          <img
+            src={img.url}
+            alt={img.caption}
+            loading="lazy"
+            style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', transition:'transform 0.6s ease' }}
+            onError={e => { e.target.style.display='none'; }}
+          />
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.15) 50%, transparent 100%)' }} />
+          <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'10px 12px' }}>
+            <div style={{ fontSize:11, fontWeight:600, color:'#fff', lineHeight:1.3 }}>{img.caption}</div>
+            <div style={{ display:'flex', alignItems:'center', gap:3, marginTop:3 }}>
+              <MapPin size={8} style={{ color:'#7a8fa0' }} />
+              <span style={{ fontSize:9, color:'#7a8fa0', fontFamily:C.mono }}>{img.location}</span>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+/* ─── Sidebar pieces ─────────────────────────────────────────── */
+const RouteBtn = ({ rKey, r, active, onClick, mobile }) => (
+  <button onClick={() => onClick(rKey)} style={{
+    textAlign:'left', cursor:'pointer', transition:'all 0.18s',
+    borderRadius:mobile?10:7, width:'100%',
+    padding: mobile ? '10px 12px' : '9px 12px',
+    borderLeft: mobile ? undefined : `3px solid ${active?r.color:C.border}`,
+    border: mobile ? `1px solid ${active?r.color:C.border}` : undefined,
+    background: active ? `${r.color}14` : 'transparent',
+  }}>
+    <div style={{ fontFamily:C.display, fontSize:'0.95rem', letterSpacing:'0.06em',
+      color:active?r.color:C.muted, lineHeight:1 }}>
+      {mobile ? r.shortTitle : r.title}
+    </div>
+    <div style={{ fontFamily:C.mono, fontSize:9, color:active?`${r.color}65`:C.faint, marginTop:3 }}>
+      {r.distance} · {r.driveTime}
+    </div>
+  </button>
+);
+
+const WeekendBtn = ({ wKey, wk, active, onClick, compact }) => (
+  <button onClick={() => onClick(wKey)} style={{
+    cursor:'pointer', transition:'all 0.15s', whiteSpace:'nowrap', textAlign:'left',
+    padding: compact ? '5px 9px' : '7px 12px', borderRadius:7, flexShrink:0,
+    background: active ? C.borderHi : 'transparent',
+    border: `1px solid ${active?C.borderHi:C.faint}`,
+    width: compact ? undefined : '100%',
+    display: compact ? undefined : 'flex', alignItems:'center', justifyContent:'space-between', gap:6,
+  }}>
+    <span style={{ fontFamily:C.mono, fontSize:compact?'0.6rem':'0.67rem', color:active?C.text:C.muted }}>
+      {compact ? wk.label : `${wk.label} · ${wk.season}`}
+    </span>
+    {compact && <div style={{ fontSize:9, color:noteColor(wk.tone), marginTop:1 }}>{wk.note}</div>}
+    {!compact && <span style={{ fontSize:10, color:noteColor(wk.tone) }}>{wk.note}</span>}
+  </button>
+);
+
+/* ─── Main export ────────────────────────────────────────────── */
 export default function WeekEndPlanner() {
   const [selectedWeekend, setSelectedWeekend] = useState('11-12-juil');
-  const [activeRoute, setActiveRoute] = useState('morbihan');
-  const [leafletReady, setLeafletReady] = useState(false);
-  const [routingDistance, setRoutingDistance] = useState(null);
-  const [routingLoading, setRoutingLoading] = useState(false);
-  const mapRef = useRef(null);
-  const mapInstance = useRef(null);
-  const layerGroup = useRef(null);
+  const [activeRoute,     setActiveRoute]     = useState('morbihan');
 
-  const data = weekends[selectedWeekend];
-
+  const data  = weekends[selectedWeekend];
   const route = routes[activeRoute];
+  const hp    = data[route.hotelKey];
+  const bMin  = Math.round(hp[0] * 0.7 + 65);
+  const bMax  = Math.round(hp[1] * 0.7 + 85);
 
-  // Charger Leaflet dynamiquement
-  useEffect(() => {
-    if (window.L) {
-      setLeafletReady(true);
-      return;
-    }
-    const css = document.createElement('link');
-    css.rel = 'stylesheet';
-    css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-    document.head.appendChild(css);
+  const wps = route.waypoints.slice(0, -1);
 
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-    script.onload = () => setLeafletReady(true);
-    document.body.appendChild(script);
-  }, []);
-
-  // Initialiser la carte
-  useEffect(() => {
-    if (!leafletReady || !mapRef.current) return;
-    const L = window.L;
-
-    if (!mapInstance.current) {
-      mapInstance.current = L.map(mapRef.current, {
-        scrollWheelZoom: false,
-        attributionControl: false,
-        tap: true,
-        touchZoom: true,
-        dragging: true
-      });
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19
-      }).addTo(mapInstance.current);
-      layerGroup.current = L.layerGroup().addTo(mapInstance.current);
-    }
-    return () => {};
-  }, [leafletReady]);
-
-  // Dessiner la boucle quand l'itinéraire change (routing sur vraies routes)
-  useEffect(() => {
-    if (!leafletReady || !mapInstance.current) return;
-    const L = window.L;
-    const map = mapInstance.current;
-
-    layerGroup.current.clearLayers();
-
-    const latlngs = route.waypoints.map(wp => wp.coords);
-
-    // Marqueurs (affichés immédiatement)
-    route.waypoints.slice(0, -1).forEach((wp) => {
-      const isEnd = wp.type === 'start' || wp.type === 'end';
-      const isSleep = wp.type === 'sleep';
-      const mColor = isEnd ? '#ef4444' : isSleep ? route.colorDark : route.color;
-      const size = isSleep ? 18 : 14;
-
-      const icon = L.divIcon({
-        className: '',
-        html: `<div style="
-          width:${size}px;height:${size}px;border-radius:50%;
-          background:${mColor};border:3px solid white;
-          box-shadow:0 0 10px ${mColor};
-        "></div>`,
-        iconSize: [size, size],
-        iconAnchor: [size / 2, size / 2]
-      });
-
-      L.marker(wp.coords, { icon })
-        .addTo(layerGroup.current)
-        .bindTooltip(`<b>${wp.name}</b><br>${wp.day}`, {
-          permanent: true,
-          direction: 'top',
-          offset: [0, -10],
-          className: 'route-tooltip'
-        });
-    });
-
-    // Ajuster la vue
-    const bounds = L.latLngBounds(latlngs);
-    map.fitBounds(bounds, { padding: [50, 50] });
-
-    // Tracé temporaire en ligne droite (le temps du routing)
-    const tempLine = L.polyline(latlngs, {
-      color: route.color, weight: 2, opacity: 0.3, dashArray: '6 8'
-    }).addTo(layerGroup.current);
-
-    // Routing OSRM sur les vraies routes
-    let cancelled = false;
-    const fetchRoute = async () => {
-      setRoutingLoading(true);
-      setRoutingDistance(null);
-      try {
-        // OSRM attend lng,lat séparés par ;
-        const coordStr = route.waypoints.map(wp => `${wp.coords[1]},${wp.coords[0]}`).join(';');
-        const url = `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`;
-        const res = await fetch(url);
-        const json = await res.json();
-
-        if (cancelled) return;
-
-        if (json.routes && json.routes[0]) {
-          const geo = json.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-          layerGroup.current.removeLayer(tempLine);
-
-          // Ombre
-          L.polyline(geo, { color: route.color, weight: 7, opacity: 0.2, lineJoin: 'round' }).addTo(layerGroup.current);
-          // Tracé principal
-          L.polyline(geo, { color: route.color, weight: 4, opacity: 0.95, lineJoin: 'round' }).addTo(layerGroup.current);
-
-          setRoutingDistance(Math.round(json.routes[0].distance / 1000));
-        }
-      } catch (e) {
-        // En cas d'échec, on garde la ligne droite
-      } finally {
-        if (!cancelled) setRoutingLoading(false);
-      }
-    };
-    fetchRoute();
-
-    return () => { cancelled = true; };
-
-  }, [activeRoute, leafletReady]);
-
-  const hotelPrice = data[route.hotelKey];
-  const budgetMin = Math.round(hotelPrice[0] * 0.7 + 65);
-  const budgetMax = Math.round(hotelPrice[1] * 0.7 + 85);
-
-  return (
-    <div className="min-h-screen bg-slate-950 p-3 md:p-8" style={{ fontFamily: 'system-ui, sans-serif' }}>
-      <style>{`
-        .route-tooltip {
-          background: rgba(15,23,42,0.92) !important;
-          border: 1px solid rgba(255,255,255,0.15) !important;
-          color: white !important;
-          font-size: 10px !important;
-          border-radius: 6px !important;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
-          padding: 3px 6px !important;
-        }
-        .route-tooltip::before { display: none !important; }
-        .leaflet-container { background: #0f172a !important; border-radius: 12px; }
-      `}</style>
-
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-5 md:mb-8">
-          <h1 className="text-3xl md:text-6xl font-black mb-1 md:mb-3 bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-400 bg-clip-text text-transparent">
-            WEEK END MOTO
-          </h1>
-          <p className="text-slate-400 text-sm md:text-lg">Au départ de Fréhel · 3 boucles · 5 week-ends</p>
-        </div>
-
-        {/* Week-end Selector */}
-        <div className="bg-slate-900 rounded-2xl p-4 md:p-6 mb-4 md:mb-6 border border-slate-800">
-          <div className="flex items-center gap-2 mb-3 md:mb-4">
-            <Calendar className="text-slate-400" size={18} />
-            <span className="text-slate-300 font-semibold text-sm md:text-base">Choisir le week-end</span>
-          </div>
-          <div className="flex md:grid md:grid-cols-5 gap-2 overflow-x-auto pb-2 md:pb-0 -mx-1 px-1 snap-x">
-            {Object.entries(weekends).map(([key, wk]) => (
-              <button
-                key={key}
-                onClick={() => setSelectedWeekend(key)}
-                className={`flex-shrink-0 w-32 md:w-auto p-3 rounded-xl font-bold transition-all snap-start ${
-                  selectedWeekend === key
-                    ? 'bg-white text-slate-900 shadow-xl'
-                    : 'bg-slate-800 text-slate-300 active:bg-slate-700'
-                }`}
-              >
-                <div className="text-sm">{wk.label}</div>
-                <div className={`text-xs mt-1 ${
-                  wk.tone === 'best' ? 'text-green-500' : wk.tone === 'warn' ? 'text-amber-500' : 'text-slate-500'
-                }`}>{wk.note}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Route Tabs */}
-        <div className="grid grid-cols-3 gap-2 mb-4 md:mb-6">
-          {Object.entries(routes).map(([key, r]) => (
-            <button
-              key={key}
-              onClick={() => setActiveRoute(key)}
-              className={`p-3 md:p-4 rounded-xl font-bold transition-all border-2 ${
-                activeRoute === key ? 'shadow-xl' : 'opacity-60 active:opacity-100'
-              }`}
-              style={{
-                backgroundColor: activeRoute === key ? r.color : '#1e293b',
-                borderColor: r.color,
-                color: activeRoute === key ? '#0f172a' : r.color
-              }}
-            >
-              <div className="text-xs md:text-base leading-tight">
-                <span className="md:hidden">{r.shortTitle}</span>
-                <span className="hidden md:inline">{r.title}</span>
-              </div>
-            </button>
+  const SidebarInfoBlock = () => (
+    <>
+      {/* Stats */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Stats</Label>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+          {[
+            { icon:<Navigation size={12}/>, val:route.distance, lbl:'Distance' },
+            { icon:<Clock size={12}/>,      val:route.driveTime, lbl:'Durée' },
+          ].map(({ icon, val, lbl }) => (
+            <div key={lbl} style={{ background:C.surface, borderLeft:`2px solid ${route.color}`, borderRadius:8, padding:'10px 12px' }}>
+              <div style={{ color:route.color, marginBottom:4 }}>{icon}</div>
+              <div style={{ fontFamily:C.mono, fontSize:'1.1rem', color:route.color, lineHeight:1 }}>{val}</div>
+              <div style={{ fontFamily:C.mono, fontSize:8, letterSpacing:'0.15em', color:C.muted, marginTop:3 }}>{lbl.toUpperCase()}</div>
+            </div>
           ))}
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="grid lg:grid-cols-5 gap-4 md:gap-6">
-          {/* Map */}
-          <div className="lg:col-span-3 bg-slate-900 rounded-2xl p-3 md:p-4 border border-slate-800">
-            <div className="flex items-center justify-between mb-3 px-1">
-              <h2 className="text-lg md:text-2xl font-black" style={{ color: route.color }}>{route.title}</h2>
-              <div className="flex gap-1.5 text-[10px] md:text-xs">
-                <span className="px-2 py-1 rounded-full bg-red-500 text-white">● Départ</span>
-                <span className="px-2 py-1 rounded-full text-white" style={{ backgroundColor: route.colorDark }}>● Nuit</span>
+      {/* Budget */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Budget · {data.label}</Label>
+        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
+            <span style={{ fontFamily:C.mono, fontSize:'1.5rem', color:C.text }}>{bMin}–{bMax}€</span>
+            <span style={{ fontSize:11, color:C.muted }}>/pers</span>
+          </div>
+          <div style={{ fontSize:10, color:C.muted, marginTop:3 }}>{route.hotelName} · {hp[0]}–{hp[1]}€/nuit</div>
+          <div style={{ fontSize:10, color:C.faint, marginTop:2 }}>Chambre + carburant + repas</div>
+          {activeRoute==='vendee' && selectedWeekend==='11-12-juil' && (
+            <div style={{ marginTop:8, fontSize:10, padding:'4px 8px', borderRadius:5, background:'#f59e0b18', color:'#f59e0b' }}>
+              ⚠ Francofolies — tarifs majorés
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Highlights */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Points forts</Label>
+        {route.highlights.map((h,i) => (
+          <div key={i} style={{ fontSize:12, color:'#8899aa', marginBottom:6 }}>{h}</div>
+        ))}
+      </div>
+
+      {/* Waypoints */}
+      <div style={{ marginBottom:20 }}>
+        <Label>Étapes</Label>
+        {wps.map((wp,i) => {
+          const isSleep = wp.type==='sleep';
+          const isEdge  = wp.type==='start';
+          return (
+            <div key={i} style={{ display:'flex', gap:10 }}>
+              <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
+                <div style={{ width:8, height:8, borderRadius:'50%', marginTop:5, flexShrink:0,
+                  background: isEdge?'#ef4444':isSleep?route.color:C.borderHi,
+                  boxShadow: isSleep?`0 0 8px ${route.color}80`:'none' }} />
+                {i<wps.length-1 && <div style={{ width:1, flex:1, minHeight:14, background:C.border, marginTop:2 }} />}
+              </div>
+              <div style={{ paddingBottom:12 }}>
+                <div style={{ fontSize:12, color:C.text }}>{wp.name}</div>
+                <div style={{ fontFamily:C.mono, fontSize:9, color:C.muted, marginTop:1 }}>{wp.day}</div>
               </div>
             </div>
-            <div ref={mapRef} className="h-[320px] md:h-[480px]" style={{ width: '100%', borderRadius: '12px' }} />
-            {!leafletReady && (
-              <div className="text-center text-slate-500 text-sm mt-2">Chargement de la carte…</div>
-            )}
+          );
+        })}
+      </div>
+
+      {/* Google Maps CTA */}
+      <a href={route.googleMapsUrl} target="_blank" rel="noopener noreferrer"
+        style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+          width:'100%', padding:'12px 16px', borderRadius:10, background:route.color, color:C.bg,
+          fontFamily:C.sans, fontSize:13, fontWeight:700, cursor:'pointer', textDecoration:'none',
+          boxShadow:`0 2px 16px ${route.color}40`, transition:'opacity 0.2s' }}
+        onMouseEnter={e=>e.currentTarget.style.opacity='.82'}
+        onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+        <Map size={14} />
+        Voir sur Google Maps
+        <ExternalLink size={12} style={{ opacity:0.7 }} />
+      </a>
+    </>
+  );
+
+  return (
+    <div style={{ minHeight:'100vh', background:C.bg, fontFamily:C.sans, color:C.text }}>
+      <style>{`
+        * { box-sizing:border-box; }
+        .gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+        .gallery-card:hover img { transform:scale(1.08); }
+        @media (min-width:1024px) {
+          .gallery-grid { grid-template-columns:repeat(4,1fr); gap:10px; }
+          .lg-sidebar  { display:flex !important; }
+          .mobile-only { display:none !important; }
+          .main-scroll { height:100vh; overflow-y:auto; }
+        }
+        ::-webkit-scrollbar { width:4px; height:4px; }
+        ::-webkit-scrollbar-track { background:${C.bg}; }
+        ::-webkit-scrollbar-thumb { background:${C.border}; border-radius:2px; }
+      `}</style>
+
+      <div style={{ display:'flex', minHeight:'100vh' }}>
+
+        {/* ── SIDEBAR (desktop only) ─────────────────────────── */}
+        <aside className="lg-sidebar" style={{
+          display:'none', width:300, flexShrink:0, flexDirection:'column',
+          background:C.sidebar, borderRight:`1px solid ${C.border}`,
+          position:'sticky', top:0, height:'100vh', overflowY:'auto',
+          padding:'22px 18px',
+        }}>
+          {/* Title */}
+          <div style={{ marginBottom:22, paddingBottom:18, borderBottom:`1px solid ${C.border}` }}>
+            <div style={{ fontFamily:C.display, fontSize:'2.5rem', lineHeight:0.88, color:C.text, letterSpacing:'0.03em' }}>
+              WEEK<br/>END<br/>MOTO
+            </div>
+            <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.2em', color:C.muted, marginTop:10 }}>
+              AU DÉPART DE FRÉHEL
+            </div>
           </div>
 
-          {/* Details */}
-          <div className="lg:col-span-2 space-y-3 md:space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="bg-slate-900 rounded-xl p-3 md:p-4 border border-slate-800">
-                <Navigation size={16} style={{ color: route.color }} />
-                <div className="text-xl md:text-2xl font-black text-white mt-1">
-                  {routingLoading ? '…' : routingDistance ? `${routingDistance} km` : route.distance}
-                </div>
-                <div className="text-[10px] md:text-xs text-slate-500">
-                  {routingDistance ? 'Distance réelle' : 'Distance estimée'}
-                </div>
-              </div>
-              <div className="bg-slate-900 rounded-xl p-3 md:p-4 border border-slate-800">
-                <Clock size={16} style={{ color: route.color }} />
-                <div className="text-xl md:text-2xl font-black text-white mt-1">{route.driveTime}</div>
-                <div className="text-[10px] md:text-xs text-slate-500">Temps de route</div>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-              <div className="flex items-center gap-2 mb-2">
-                <Wallet size={16} style={{ color: route.color }} />
-                <span className="text-slate-300 font-semibold text-sm">Budget · {data.label}</span>
-              </div>
-              <div className="text-2xl md:text-3xl font-black text-white">{budgetMin}-{budgetMax}€<span className="text-sm text-slate-500 font-normal">/pers</span></div>
-              <div className="text-xs text-slate-500 mt-1">{route.hotelName}: {hotelPrice[0]}-{hotelPrice[1]}€/nuit</div>
-              {activeRoute === 'vendee' && selectedWeekend === '11-12-juil' && (
-                <div className="mt-2 text-xs text-amber-400 bg-amber-400/10 rounded p-2">⚠️ Francofolies = tarifs gonflés</div>
+          <div style={{ marginBottom:18 }}>
+            <Label>Itinéraire</Label>
+            <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+              {Object.entries(routes).map(([k,r]) =>
+                <RouteBtn key={k} rKey={k} r={r} active={activeRoute===k} onClick={setActiveRoute} mobile={false}/>
               )}
             </div>
+          </div>
 
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-              <h3 className="text-slate-300 font-semibold text-sm mb-3">Points forts</h3>
-              <div className="space-y-2">
-                {route.highlights.map((h, i) => (
-                  <div key={i} className="text-sm text-slate-200">{h}</div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-slate-900 rounded-xl p-4 border border-slate-800">
-              <h3 className="text-slate-300 font-semibold text-sm mb-3">Étapes de la boucle</h3>
-              <div className="space-y-1">
-                {route.waypoints.slice(0, -1).map((wp, i) => (
-                  <div key={i} className="flex items-center gap-3 text-sm py-1">
-                    <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ 
-                      backgroundColor: wp.type === 'start' || wp.type === 'end' ? '#ef4444' : wp.type === 'sleep' ? route.colorDark : route.color 
-                    }} />
-                    <span className="text-white font-medium">{wp.name}</span>
-                    <span className="text-slate-500 text-xs ml-auto">{wp.day}</span>
-                  </div>
-                ))}
-              </div>
+          <div style={{ marginBottom:18 }}>
+            <Label>Date du week-end</Label>
+            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+              {Object.entries(weekends).map(([k,wk]) =>
+                <WeekendBtn key={k} wKey={k} wk={wk} active={selectedWeekend===k} onClick={setSelectedWeekend} compact={false}/>
+              )}
             </div>
           </div>
-        </div>
 
-        <div className="mt-5 md:mt-6 text-center text-slate-600 text-[10px] md:text-xs px-4">
-          🏍 Tracés indicatifs · Tarifs estimés selon la saison · Réservation conseillée à l'avance
-        </div>
+          <SidebarInfoBlock />
+        </aside>
+
+        {/* ── MAIN ──────────────────────────────────────────── */}
+        <main className="main-scroll" style={{ flex:1, minWidth:0, display:'flex', flexDirection:'column' }}>
+
+          {/* Mobile header */}
+          <div className="mobile-only" style={{ padding:'18px 18px 0' }}>
+            <div style={{ fontFamily:C.display, fontSize:'2.2rem', lineHeight:0.9, color:C.text }}>
+              WEEK END MOTO
+            </div>
+            <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.18em', color:C.muted, marginTop:7 }}>
+              AU DÉPART DE FRÉHEL · 4 BOUCLES
+            </div>
+          </div>
+
+          {/* Mobile: route selector */}
+          <div className="mobile-only" style={{ padding:'14px 18px 0' }}>
+            <Label>Itinéraire</Label>
+            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
+              {Object.entries(routes).map(([k,r]) =>
+                <RouteBtn key={k} rKey={k} r={r} active={activeRoute===k} onClick={setActiveRoute} mobile={true}/>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile: weekend selector */}
+          <div className="mobile-only" style={{ padding:'12px 18px 0', position:'relative' }}>
+            <Label>Week-end</Label>
+            <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4, scrollbarWidth:'none' }}>
+              {Object.entries(weekends).map(([k,wk]) =>
+                <WeekendBtn key={k} wKey={k} wk={wk} active={selectedWeekend===k} onClick={setSelectedWeekend} compact={true}/>
+              )}
+            </div>
+          </div>
+
+          {/* ── Route Banner (replaces map) ── */}
+          <RouteBanner route={route} data={data} />
+
+          {/* Mobile info block */}
+          <div className="mobile-only" style={{ padding:'16px 18px 0' }}>
+            <SidebarInfoBlock />
+          </div>
+
+          {/* ── Gallery ── */}
+          <Gallery route={route} />
+
+          <div style={{ padding:'0 20px 20px', fontSize:9, color:C.faint, fontFamily:C.mono, letterSpacing:'0.12em' }}>
+            TRACÉS INDICATIFS · TARIFS ESTIMÉS · RÉSERVATION CONSEILLÉE
+          </div>
+        </main>
       </div>
     </div>
   );
