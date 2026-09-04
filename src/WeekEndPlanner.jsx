@@ -173,8 +173,114 @@ const routes = {
   },
 };
 
+/* ─── Boucles à la journée (départ/retour Hénansal) ─────────── */
+const dayRoutes = {
+  emeraude: {
+    title:"Côte d'Émeraude", shortTitle:'Émeraude',
+    subtitle:'Saint-Malo, Dinard & Cancale',
+    color:'#38bdf8', colorDark:'#0ea5e9',
+    distance:'160 km', driveTime:'3h15',
+    googleMapsUrl:'https://www.google.com/maps/dir/Henansal+22400/Saint-Malo+35400/Dinard+35800/Cancale+35260/Henansal+22400',
+    waypoints:[
+      { name:'Hénansal',        type:'start', day:'Départ 9h30' },
+      { name:'Saint-Malo',      type:'stop',  day:'Matin' },
+      { name:'St-Malo / Dinard',type:'lunch', day:'Midi' },
+      { name:'Dinard',          type:'stop',  day:'Après-midi' },
+      { name:'Cancale',         type:'stop',  day:"Fin d'aprèm" },
+      { name:'Hénansal',        type:'end',   day:'Retour ~19h' },
+    ],
+    highlights:['🏰 Remparts & cité corsaire de Saint-Malo',"🏖️ Plage de l'Écluse à Dinard",'🦪 Huîtres de Cancale','🌊 Vue sur la baie depuis la Pointe du Grouin'],
+    lunch:[
+      { name:'Bougeotte', town:'Saint-Malo intra-muros', note:'Bistrot bien noté, en plein cœur de la cité corsaire', query:'Restaurant Bougeotte Saint-Malo' },
+      { name:'Grand Bain', town:'Dinard', note:'Cuisine contemporaine en bord de plage (9.2/10)', query:'Grand Bain restaurant Dinard' },
+    ],
+    images:[
+      { url:`${WI}/8/83/IMG_2935_StMalo.JPG/330px-IMG_2935_StMalo.JPG`, caption:'Remparts de Saint-Malo', location:'Saint-Malo' },
+      { url:`${WI}/d/d5/Dinard_Plage_de_l%27Ecluse-2007-08-08.jpg/330px-Dinard_Plage_de_l%27Ecluse-2007-08-08.jpg`, caption:"Plage de l'Écluse", location:'Dinard' },
+      { url:`${WI}/9/94/Cancale_03.jpg/330px-Cancale_03.jpg`, caption:'Port de Cancale', location:'Cancale' },
+      { url:`${WI}/8/81/France_Pointe_Du_Grouin_bordercropped.jpg/330px-France_Pointe_Du_Grouin_bordercropped.jpg`, caption:'Pointe du Grouin', location:'Cancale' },
+    ],
+  },
+  guerledan: {
+    title:'Lac de Guerlédan', shortTitle:'Guerlédan',
+    subtitle:'Lac, forêts & abbaye de Bon-Repos',
+    color:'#4ade80', colorDark:'#22c55e',
+    distance:'140 km', driveTime:'2h45',
+    googleMapsUrl:'https://www.google.com/maps/dir/Henansal+22400/Mur-de-Bretagne+22530/Caurel+22530/Saint-Gelven+22570/Henansal+22400',
+    waypoints:[
+      { name:'Hénansal',          type:'start', day:'Départ 10h' },
+      { name:'Mûr-de-Bretagne',   type:'stop',  day:'Matin' },
+      { name:'Lac de Guerlédan',  type:'lunch', day:'Midi' },
+      { name:'Abbaye de Bon-Repos', type:'stop', day:'Après-midi' },
+      { name:'Hénansal',          type:'end',   day:'Retour ~18h' },
+    ],
+    highlights:['🌲 Forêts & rives du lac de Guerlédan','⛪ Abbaye cistercienne de Bon-Repos','🚣 Point de vue sur le barrage','🏍️ Petites routes forestières tranquilles'],
+    lunch:[
+      { name:"L'Embarcadère", town:'Caurel, bord du lac', note:'Vue panoramique sur le lac, grande terrasse', query:"L'Embarcadère Lac de Guerlédan Caurel" },
+      { name:'Auberge de Guerlédan', town:'Caurel', note:'Cuisine traditionnelle, menu du midi ~17,50€', query:'Auberge de Guerlédan Caurel' },
+    ],
+    images:[
+      { url:`${WI}/d/dd/Lac_Guerledan.JPG/330px-Lac_Guerledan.JPG`, caption:'Le lac de Guerlédan', location:'Guerlédan' },
+      { url:`${WI}/c/c8/Abbaye_Notre-Dame-de-Bon-Repos%2C_Saint-Gelven%2C_France-5.jpg/330px-Abbaye_Notre-Dame-de-Bon-Repos%2C_Saint-Gelven%2C_France-5.jpg`, caption:'Abbaye de Bon-Repos', location:'Saint-Gelven' },
+      { url:`${WI}/b/bc/M%C3%BBr-de-Bretagne_-_mairie.JPG/330px-M%C3%BBr-de-Bretagne_-_mairie.JPG`, caption:'Mûr-de-Bretagne', location:'Mûr-de-Bretagne' },
+    ],
+  },
+  granitRose: {
+    title:'Côte de Granit Rose', shortTitle:'Granit Rose',
+    subtitle:"Perros-Guirec, Ploumanac'h & Trégastel",
+    color:'#fb7185', colorDark:'#f43f5e',
+    distance:'230 km', driveTime:'4h30',
+    googleMapsUrl:'https://www.google.com/maps/dir/Henansal+22400/Perros-Guirec+22700/Tregastel+22730/Trebeurden+22560/Henansal+22400',
+    waypoints:[
+      { name:'Hénansal',      type:'start', day:'Départ 9h' },
+      { name:'Perros-Guirec', type:'stop',  day:'Matin' },
+      { name:"Ploumanac'h",   type:'lunch', day:'Midi' },
+      { name:'Trégastel',     type:'stop',  day:'Après-midi' },
+      { name:'Trébeurden',    type:'stop',  day:"Fin d'aprèm" },
+      { name:'Hénansal',      type:'end',   day:'Retour ~19h30' },
+    ],
+    highlights:['🌸 Rochers de granit rose emblématiques','🚶 Sentier des douaniers','🏖️ Plages de Trégastel & Trébeurden',"🗼 Phare de Ploumanac'h"],
+    lunch:[
+      { name:'Le Men Ruz', town:"Port de Ploumanac'h", note:'Ambiance conviviale, vue sur le port', query:"Le Men Ruz restaurant Perros-Guirec" },
+      { name:"L'Atelier", town:"Entre Ploumanac'h et Trégastel", note:'Produits frais et locaux, terrasse', query:"Restaurant L'Atelier Perros-Guirec" },
+    ],
+    images:[
+      { url:`${WI}/c/c0/Port_de_Ploum_2.JPG/330px-Port_de_Ploum_2.JPG`, caption:"Port de Ploumanac'h", location:"Ploumanac'h" },
+      { url:`${WI}/8/8b/Perros-Guirec_-_La_C%C3%B4te_de_granit_rose_et_le_phare_de_Ploumanac%27h_-_Juin_2005.jpg/330px-Perros-Guirec_-_La_C%C3%B4te_de_granit_rose_et_le_phare_de_Ploumanac%27h_-_Juin_2005.jpg`, caption:'Côte de granit rose & phare', location:'Perros-Guirec' },
+      { url:`${WI}/a/ae/France_Cotes_d_Armor_Cote_de_granit_rose_04.jpg/330px-France_Cotes_d_Armor_Cote_de_granit_rose_04.jpg`, caption:'Rochers de granit rose', location:"Côtes-d'Armor" },
+    ],
+  },
+  montSaintMichel: {
+    title:'Mont-Saint-Michel & Baie', shortTitle:'Mt-St-Michel',
+    subtitle:'Abbaye, baie & Dol-de-Bretagne',
+    color:'#fbbf24', colorDark:'#f59e0b',
+    distance:'190 km', driveTime:'3h45',
+    googleMapsUrl:'https://www.google.com/maps/dir/Henansal+22400/Dol-de-Bretagne+35120/Le+Mont-Saint-Michel+50170/Beauvoir+50170/Cancale+35260/Henansal+22400',
+    waypoints:[
+      { name:'Hénansal',          type:'start', day:'Départ 9h' },
+      { name:'Dol-de-Bretagne',   type:'stop',  day:'Matin' },
+      { name:'Mont-Saint-Michel', type:'stop',  day:'Fin de matinée' },
+      { name:'Beauvoir',          type:'lunch', day:'Midi' },
+      { name:'Cancale',           type:'stop',  day:'Après-midi' },
+      { name:'Hénansal',          type:'end',   day:'Retour ~19h30' },
+    ],
+    highlights:['🏔️ Abbaye du Mont-Saint-Michel','⛪ Cathédrale & ruelles de Dol-de-Bretagne','🌊 Traversée de la baie à marée basse','🦪 Huîtres de Cancale au retour'],
+    lunch:[
+      { name:'Bistro du Mont', town:'Beauvoir, à 4km du Mont', note:'Cuisine maison, parking gratuit', query:'Bistro du Mont Beauvoir' },
+      { name:'Le Moulin de Beauchamps', town:'Pontorson', note:'Ancien moulin, cuisine traditionnelle', query:'Le Moulin de Beauchamps Pontorson' },
+    ],
+    images:[
+      { url:`${WI}/e/ef/Mont_St_Michel_in_the_afternoon.jpg/330px-Mont_St_Michel_in_the_afternoon.jpg`, caption:'Le Mont-Saint-Michel', location:'Mont-Saint-Michel' },
+      { url:`${WI}/d/df/Mont_Saint-Michel%2C_France_ESA394286.jpg/330px-Mont_Saint-Michel%2C_France_ESA394286.jpg`, caption:'Vue aérienne du Mont', location:'Baie du Mont-Saint-Michel' },
+      { url:`${WI}/2/28/Dol-de-Bretagne_-_La_Grande_Rue.jpg/330px-Dol-de-Bretagne_-_La_Grande_Rue.jpg`, caption:'Grande Rue de Dol', location:'Dol-de-Bretagne' },
+      { url:`${WI}/9/94/Cancale_03.jpg/330px-Cancale_03.jpg`, caption:'Port de Cancale', location:'Cancale' },
+    ],
+  },
+};
+
 /* ─── Helpers ────────────────────────────────────────────────── */
 const noteColor = t => t==='best'?'#22c55e':t==='warn'?'#f59e0b':'#3d5263';
+const isHighlightWp = t => t==='sleep' || t==='lunch';
 
 const Label = ({ children, style }) => (
   <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.18em', color:C.muted, textTransform:'uppercase', marginBottom:8, ...style }}>
@@ -223,22 +329,22 @@ const RouteBanner = ({ route, data }) => {
           {wps.map((wp, i) => {
             const isStart = wp.type==='start';
             const isEnd   = wp.type==='end';
-            const isSleep = wp.type==='sleep';
-            const dotCol  = (isStart||isEnd) ? '#ef4444' : isSleep ? route.color : C.borderHi;
+            const isHi    = isHighlightWp(wp.type);
+            const dotCol  = (isStart||isEnd) ? '#ef4444' : isHi ? route.color : C.borderHi;
             const isLast  = i === wps.length-1;
             return (
               <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:0 }}>
                 {/* Dot + label */}
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
                   <div style={{
-                    width: isSleep?11:8, height: isSleep?11:8, borderRadius:'50%',
+                    width: isHi?11:8, height: isHi?11:8, borderRadius:'50%',
                     background:dotCol, marginTop:2, flexShrink:0,
-                    boxShadow: isSleep?`0 0 10px ${route.color}90`:'none',
-                    border: isSleep?`2px solid ${route.color}60`:'none',
+                    boxShadow: isHi?`0 0 10px ${route.color}90`:'none',
+                    border: isHi?`2px solid ${route.color}60`:'none',
                   }} />
                   <div style={{ textAlign:'center' }}>
-                    <div style={{ fontSize:10, color: isSleep?route.color:(isStart||isEnd)?'#ef4444':C.text,
-                      fontWeight: isSleep?600:400, whiteSpace:'nowrap', lineHeight:1.2 }}>
+                    <div style={{ fontSize:10, color: isHi?route.color:(isStart||isEnd)?'#ef4444':C.text,
+                      fontWeight: isHi?600:400, whiteSpace:'nowrap', lineHeight:1.2 }}>
                       {wp.name}
                     </div>
                     <div style={{ fontFamily:C.mono, fontSize:8, color:C.muted, marginTop:2, whiteSpace:'nowrap' }}>
@@ -358,16 +464,38 @@ const WeekendBtn = ({ wKey, wk, active, onClick, compact }) => (
   </button>
 );
 
+const ModeToggle = ({ mode, onChange }) => (
+  <div style={{ display:'flex', gap:4, marginBottom:18, background:C.surface, padding:3, borderRadius:9, border:`1px solid ${C.border}` }}>
+    {[['weekend','Week-end'],['day','Journée']].map(([m,label]) => (
+      <button key={m} onClick={() => onChange(m)} style={{
+        flex:1, padding:'8px 0', borderRadius:7, cursor:'pointer', border:'none',
+        fontFamily:C.sans, fontSize:12, fontWeight:600, transition:'all 0.15s',
+        background: mode===m ? C.borderHi : 'transparent',
+        color: mode===m ? C.text : C.muted,
+      }}>
+        {label}
+      </button>
+    ))}
+  </div>
+);
+
 /* ─── Main export ────────────────────────────────────────────── */
 export default function WeekEndPlanner() {
-  const [selectedWeekend, setSelectedWeekend] = useState('11-12-juil');
-  const [activeRoute,     setActiveRoute]     = useState('morbihan');
+  const [mode,            setMode]            = useState('weekend');
+  const [selectedWeekend, setSelectedWeekend]  = useState('11-12-juil');
+  const [activeRoute,     setActiveRoute]      = useState('morbihan');
+  const [activeDayRoute,  setActiveDayRoute]   = useState('emeraude');
 
+  const isDay = mode === 'day';
   const data  = weekends[selectedWeekend];
-  const route = routes[activeRoute];
-  const hp    = data[route.hotelKey];
-  const bMin  = Math.round(hp[0] * 0.7 + 65);
-  const bMax  = Math.round(hp[1] * 0.7 + 85);
+  const route = isDay ? dayRoutes[activeDayRoute] : routes[activeRoute];
+  const hp    = !isDay ? data[route.hotelKey] : null;
+  const bMin  = hp ? Math.round(hp[0] * 0.7 + 65) : null;
+  const bMax  = hp ? Math.round(hp[1] * 0.7 + 85) : null;
+
+  const activeRoutes    = isDay ? dayRoutes : routes;
+  const activeRouteKey  = isDay ? activeDayRoute : activeRoute;
+  const setActiveRouteFn = isDay ? setActiveDayRoute : setActiveRoute;
 
   const wps = route.waypoints.slice(0, -1);
 
@@ -390,45 +518,71 @@ export default function WeekEndPlanner() {
         </div>
       </div>
 
-      {/* Budget */}
-      <div style={{ marginBottom:16 }}>
-        <Label>Budget · {data.label}</Label>
-        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
-          <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
-            <span style={{ fontFamily:C.mono, fontSize:'1.5rem', color:C.text }}>{bMin}–{bMax}€</span>
-            <span style={{ fontSize:11, color:C.muted }}>/pers</span>
-          </div>
-          <div style={{ fontSize:10, color:C.muted, marginTop:3 }}>{route.hotelName} · {hp[0]}–{hp[1]}€/nuit</div>
-          <div style={{ fontSize:10, color:C.faint, marginTop:2 }}>Chambre + carburant + repas</div>
-          {activeRoute==='vendee' && selectedWeekend==='11-12-juil' && (
-            <div style={{ marginTop:8, fontSize:10, padding:'4px 8px', borderRadius:5, background:'#f59e0b18', color:'#f59e0b' }}>
-              ⚠ Francofolies — tarifs majorés
+      {!isDay && (
+        <>
+          {/* Budget */}
+          <div style={{ marginBottom:16 }}>
+            <Label>Budget · {data.label}</Label>
+            <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+              <div style={{ display:'flex', alignItems:'baseline', gap:4 }}>
+                <span style={{ fontFamily:C.mono, fontSize:'1.5rem', color:C.text }}>{bMin}–{bMax}€</span>
+                <span style={{ fontSize:11, color:C.muted }}>/pers</span>
+              </div>
+              <div style={{ fontSize:10, color:C.muted, marginTop:3 }}>{route.hotelName} · {hp[0]}–{hp[1]}€/nuit</div>
+              <div style={{ fontSize:10, color:C.faint, marginTop:2 }}>Chambre + carburant + repas</div>
+              {activeRoute==='vendee' && selectedWeekend==='11-12-juil' && (
+                <div style={{ marginTop:8, fontSize:10, padding:'4px 8px', borderRadius:5, background:'#f59e0b18', color:'#f59e0b' }}>
+                  ⚠ Francofolies — tarifs majorés
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Hotel booking */}
-      <div style={{ marginBottom:16 }}>
-        <Label>Réserver</Label>
-        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
-          <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10 }}>
-            <span style={{ fontSize:10, color:C.muted, fontFamily:C.mono }}>📅 {weekendDates[selectedWeekend].label}</span>
+          {/* Hotel booking */}
+          <div style={{ marginBottom:16 }}>
+            <Label>Réserver</Label>
+            <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:10 }}>
+                <span style={{ fontSize:10, color:C.muted, fontFamily:C.mono }}>📅 {weekendDates[selectedWeekend].label}</span>
+              </div>
+              <a href={bookingUrl(route.hotelKey, selectedWeekend)} target="_blank" rel="noopener noreferrer"
+                style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8,
+                  padding:'9px 12px', borderRadius:8, background:'#003580', color:'#fff',
+                  fontSize:12, fontWeight:600, textDecoration:'none', cursor:'pointer' }}
+                onMouseEnter={e=>e.currentTarget.style.background='#00224f'}
+                onMouseLeave={e=>e.currentTarget.style.background='#003580'}>
+                <span>🏨 Hôtels à {route.hotelName.split(' ')[0]}</span>
+                <ExternalLink size={11} style={{ opacity:0.7, flexShrink:0 }} />
+              </a>
+              <div style={{ fontSize:9, color:C.faint, marginTop:6, fontFamily:C.mono, letterSpacing:'0.1em' }}>
+                VIA BOOKING.COM · {hp[0]}–{hp[1]}€ ESTIMÉ/NUIT
+              </div>
+            </div>
           </div>
-          <a href={bookingUrl(route.hotelKey, selectedWeekend)} target="_blank" rel="noopener noreferrer"
-            style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8,
-              padding:'9px 12px', borderRadius:8, background:'#003580', color:'#fff',
-              fontSize:12, fontWeight:600, textDecoration:'none', cursor:'pointer' }}
-            onMouseEnter={e=>e.currentTarget.style.background='#00224f'}
-            onMouseLeave={e=>e.currentTarget.style.background='#003580'}>
-            <span>🏨 Hôtels à {route.hotelName.split(' ')[0]}</span>
-            <ExternalLink size={11} style={{ opacity:0.7, flexShrink:0 }} />
-          </a>
-          <div style={{ fontSize:9, color:C.faint, marginTop:6, fontFamily:C.mono, letterSpacing:'0.1em' }}>
-            VIA BOOKING.COM · {hp[0]}–{hp[1]}€ ESTIMÉ/NUIT
+        </>
+      )}
+
+      {isDay && (
+        /* Pause déjeuner */
+        <div style={{ marginBottom:16 }}>
+          <Label>Pause déjeuner</Label>
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {route.lunch.map((l, i) => (
+              <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+                  <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{l.name}</span>
+                  <a href={`https://www.google.com/maps/search/${encodeURIComponent(l.query)}`} target="_blank" rel="noopener noreferrer"
+                    style={{ color:route.color, display:'flex', alignItems:'center', flexShrink:0 }}>
+                    <ExternalLink size={12} />
+                  </a>
+                </div>
+                <div style={{ fontSize:10, color:C.muted, marginTop:2, fontFamily:C.mono }}>{l.town}</div>
+                <div style={{ fontSize:11, color:'#8899aa', marginTop:4 }}>{l.note}</div>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
+      )}
 
       {/* Highlights */}
       <div style={{ marginBottom:16 }}>
@@ -442,14 +596,14 @@ export default function WeekEndPlanner() {
       <div style={{ marginBottom:20 }}>
         <Label>Étapes</Label>
         {wps.map((wp,i) => {
-          const isSleep = wp.type==='sleep';
-          const isEdge  = wp.type==='start';
+          const isHi   = isHighlightWp(wp.type);
+          const isEdge = wp.type==='start';
           return (
             <div key={i} style={{ display:'flex', gap:10 }}>
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
                 <div style={{ width:8, height:8, borderRadius:'50%', marginTop:5, flexShrink:0,
-                  background: isEdge?'#ef4444':isSleep?route.color:C.borderHi,
-                  boxShadow: isSleep?`0 0 8px ${route.color}80`:'none' }} />
+                  background: isEdge?'#ef4444':isHi?route.color:C.borderHi,
+                  boxShadow: isHi?`0 0 8px ${route.color}80`:'none' }} />
                 {i<wps.length-1 && <div style={{ width:1, flex:1, minHeight:14, background:C.border, marginTop:2 }} />}
               </div>
               <div style={{ paddingBottom:12 }}>
@@ -509,27 +663,31 @@ export default function WeekEndPlanner() {
               WEEK<br/>END<br/>MOTO
             </div>
             <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.2em', color:C.muted, marginTop:10 }}>
-              AU DÉPART DE FRÉHEL
+              {isDay ? "AU DÉPART D'HÉNANSAL" : 'AU DÉPART DE FRÉHEL'}
             </div>
           </div>
+
+          <ModeToggle mode={mode} onChange={setMode} />
 
           <div style={{ marginBottom:18 }}>
             <Label>Itinéraire</Label>
             <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
-              {Object.entries(routes).map(([k,r]) =>
-                <RouteBtn key={k} rKey={k} r={r} active={activeRoute===k} onClick={setActiveRoute} mobile={false}/>
+              {Object.entries(activeRoutes).map(([k,r]) =>
+                <RouteBtn key={k} rKey={k} r={r} active={activeRouteKey===k} onClick={setActiveRouteFn} mobile={false}/>
               )}
             </div>
           </div>
 
-          <div style={{ marginBottom:18 }}>
-            <Label>Date du week-end</Label>
-            <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
-              {Object.entries(weekends).map(([k,wk]) =>
-                <WeekendBtn key={k} wKey={k} wk={wk} active={selectedWeekend===k} onClick={setSelectedWeekend} compact={false}/>
-              )}
+          {!isDay && (
+            <div style={{ marginBottom:18 }}>
+              <Label>Date du week-end</Label>
+              <div style={{ display:'flex', flexDirection:'column', gap:2 }}>
+                {Object.entries(weekends).map(([k,wk]) =>
+                  <WeekendBtn key={k} wKey={k} wk={wk} active={selectedWeekend===k} onClick={setSelectedWeekend} compact={false}/>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <SidebarInfoBlock />
         </aside>
@@ -543,29 +701,36 @@ export default function WeekEndPlanner() {
               WEEK END MOTO
             </div>
             <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.18em', color:C.muted, marginTop:7 }}>
-              AU DÉPART DE FRÉHEL · 4 BOUCLES
+              {isDay ? "AU DÉPART D'HÉNANSAL" : 'AU DÉPART DE FRÉHEL'} · {Object.keys(activeRoutes).length} BOUCLES
             </div>
           </div>
 
-          {/* Mobile: route selector */}
+          {/* Mobile: mode toggle */}
           <div className="mobile-only" style={{ padding:'14px 18px 0' }}>
+            <ModeToggle mode={mode} onChange={setMode} />
+          </div>
+
+          {/* Mobile: route selector */}
+          <div className="mobile-only" style={{ padding:'0 18px 0' }}>
             <Label>Itinéraire</Label>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              {Object.entries(routes).map(([k,r]) =>
-                <RouteBtn key={k} rKey={k} r={r} active={activeRoute===k} onClick={setActiveRoute} mobile={true}/>
+              {Object.entries(activeRoutes).map(([k,r]) =>
+                <RouteBtn key={k} rKey={k} r={r} active={activeRouteKey===k} onClick={setActiveRouteFn} mobile={true}/>
               )}
             </div>
           </div>
 
           {/* Mobile: weekend selector */}
-          <div className="mobile-only" style={{ padding:'12px 18px 0', position:'relative' }}>
-            <Label>Week-end</Label>
-            <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4, scrollbarWidth:'none' }}>
-              {Object.entries(weekends).map(([k,wk]) =>
-                <WeekendBtn key={k} wKey={k} wk={wk} active={selectedWeekend===k} onClick={setSelectedWeekend} compact={true}/>
-              )}
+          {!isDay && (
+            <div className="mobile-only" style={{ padding:'12px 18px 0', position:'relative' }}>
+              <Label>Week-end</Label>
+              <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:4, scrollbarWidth:'none' }}>
+                {Object.entries(weekends).map(([k,wk]) =>
+                  <WeekendBtn key={k} wKey={k} wk={wk} active={selectedWeekend===k} onClick={setSelectedWeekend} compact={true}/>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* ── Route Banner (replaces map) ── */}
           <RouteBanner route={route} data={data} />
