@@ -194,8 +194,8 @@ const dayRoutes = {
     ],
     highlights:['🏰 Remparts & cité corsaire de Saint-Malo',"🏖️ Plage de l'Écluse à Dinard",'🦪 Huîtres de Cancale','🌊 Vue sur la baie depuis la Pointe du Grouin'],
     lunch:[
-      { name:"Le Rad'Alet", town:'Saint-Servan, près de la Cité d\'Alet', note:'Cuisine simple et généreuse (4.5-4.8/5) — sur le tracé, vers le milieu du parcours, pas besoin d\'entrer dans l\'intra-muros', query:"Le Rad'Alet restaurant Saint-Malo" },
-      { name:'Grand Bain', town:'Dinard', note:'Cuisine contemporaine en bord de plage (9.2/10) — alternative si vous préférez manger un peu plus tard, sur le chemin du retour', query:'Grand Bain restaurant Dinard' },
+      { name:"Le Rad'Alet", town:'Saint-Servan, près de la Cité d\'Alet', note:'Cuisine simple et généreuse (4.5-4.8/5) — sur le tracé, vers le milieu du parcours, pas besoin d\'entrer dans l\'intra-muros', query:"Le Rad'Alet restaurant Saint-Malo", photo:'https://media-cdn.tripadvisor.com/media/photo-o/11/6d/92/f1/rad-burger.jpg' },
+      { name:'Grand Bain', town:'Dinard', note:'Cuisine contemporaine en bord de plage (9.2/10) — alternative si vous préférez manger un peu plus tard, sur le chemin du retour', query:'Grand Bain restaurant Dinard', photo:'https://cdt35.media.tourinsoft.eu/upload/Grand-Bain---2025---Agence-Pancake.jpg' },
     ],
     images:[
       { url:`${WI}/8/83/IMG_2935_StMalo.JPG/330px-IMG_2935_StMalo.JPG`, caption:'Remparts de Saint-Malo', location:'Saint-Malo' },
@@ -220,13 +220,16 @@ const dayRoutes = {
     ],
     highlights:['🌲 Forêts & rives du lac de Guerlédan','⛪ Abbaye cistercienne de Bon-Repos','🚣 Point de vue sur le barrage','🏍️ Petites routes forestières tranquilles'],
     lunch:[
-      { name:"L'Embarcadère", town:'Caurel, bord du lac', note:'Vue panoramique sur le lac, grande terrasse', query:"L'Embarcadère Lac de Guerlédan Caurel" },
-      { name:'Auberge de Guerlédan', town:'Caurel', note:'Cuisine traditionnelle, menu du midi ~17,50€', query:'Auberge de Guerlédan Caurel' },
+      { name:"L'Embarcadère", town:'Caurel, bord du lac', note:'Vue panoramique sur le lac, grande terrasse', query:"L'Embarcadère Lac de Guerlédan Caurel", photo:'https://cdn.iris-etourism.io/media/lac_de_guerledan/RESBRE022V50TZFB/3b8c795c177d4b5e-800x520.webp' },
+      { name:'Auberge de Guerlédan', town:'Caurel', note:'Cuisine traditionnelle, menu du midi ~17,50€', query:'Auberge de Guerlédan Caurel', photo:'https://cdn.iris-etourism.io/media/lac_de_guerledan/RESBRE02209Q2VU1/16272038b720e525-800x520.webp' },
     ],
     images:[
       { url:`${WI}/d/dd/Lac_Guerledan.JPG/330px-Lac_Guerledan.JPG`, caption:'Le lac de Guerlédan', location:'Guerlédan' },
       { url:`${WI}/c/c8/Abbaye_Notre-Dame-de-Bon-Repos%2C_Saint-Gelven%2C_France-5.jpg/330px-Abbaye_Notre-Dame-de-Bon-Repos%2C_Saint-Gelven%2C_France-5.jpg`, caption:'Abbaye de Bon-Repos', location:'Saint-Gelven' },
       { url:`${WI}/b/bc/M%C3%BBr-de-Bretagne_-_mairie.JPG/330px-M%C3%BBr-de-Bretagne_-_mairie.JPG`, caption:'Mûr-de-Bretagne', location:'Mûr-de-Bretagne' },
+      { url:`${WI}/7/7a/Barrage_Guerledan.JPG/330px-Barrage_Guerledan.JPG`, caption:'Barrage de Guerlédan', location:'Guerlédan' },
+      { url:`${WI}/8/86/Sentier_dans_la_foret_de_K%C3%A9n%C3%A9quan_au_bord_du_lac.jpg/330px-Sentier_dans_la_foret_de_K%C3%A9n%C3%A9quan_au_bord_du_lac.jpg`, caption:'Sentier en forêt de Quénécan', location:'Forêt de Quénécan' },
+      { url:`${WI}/6/6f/Saint-Aignan_%2856%29_%C3%89glise_05.JPG/330px-Saint-Aignan_%2856%29_%C3%89glise_05.JPG`, caption:'Église de Saint-Aignan', location:'Saint-Aignan' },
     ],
   },
   granitRose: {
@@ -246,8 +249,8 @@ const dayRoutes = {
     ],
     highlights:['🗿 Chapeau de Napoléon, Pointe du Château','🚶 Sentier des douaniers','🏝️ Île Renote & ses rochers roses',"🗼 Phare de Ploumanac'h"],
     lunch:[
-      { name:'Le Men Ruz', town:"Port de Ploumanac'h", note:'Ambiance conviviale, vue sur le port', query:"Le Men Ruz restaurant Perros-Guirec" },
-      { name:"L'Atelier", town:"Entre Ploumanac'h et Trégastel", note:'Produits frais et locaux, terrasse', query:"Restaurant L'Atelier Perros-Guirec" },
+      { name:'Le Men Ruz', town:"Port de Ploumanac'h", note:'Ambiance conviviale, vue sur le port', query:"Le Men Ruz restaurant Perros-Guirec", photo:'https://www.restaurant-lemenruz-perros.com/wp-content/uploads/2018/06/facade-duplex.jpg' },
+      { name:"L'Atelier", town:"Entre Ploumanac'h et Trégastel", note:'Produits frais et locaux, terrasse', query:"Restaurant L'Atelier Perros-Guirec", photo:'https://latelier-perrosguirec.com/wp-content/themes/theme-atelier/assets/images/restaurant-latelier-perros-guirec-la-salle.jpg' },
     ],
     images:[
       { url:`${WI}/c/c0/Port_de_Ploum_2.JPG/330px-Port_de_Ploum_2.JPG`, caption:"Port de Ploumanac'h", location:"Ploumanac'h" },
@@ -272,14 +275,17 @@ const dayRoutes = {
     ],
     highlights:['🏔️ Abbaye du Mont-Saint-Michel','🗿 Menhir du Champ Dolent, mégalithe classé','🌊 Traversée de la baie à marée basse','🦪 Huîtres de Cancale au retour'],
     lunch:[
-      { name:'Bistro du Mont', town:'Beauvoir, à 4km du Mont', note:'Cuisine maison, parking gratuit', query:'Bistro du Mont Beauvoir' },
-      { name:'Le Moulin de Beauchamps', town:'Pontorson', note:'Ancien moulin, cuisine traditionnelle', query:'Le Moulin de Beauchamps Pontorson' },
+      { name:'Bistro du Mont', town:'Beauvoir, à 4km du Mont', note:'Cuisine maison, parking gratuit', query:'Bistro du Mont Beauvoir', photo:'https://bistrodumont.fr/img/facade.webp' },
+      { name:'Le Moulin de Beauchamps', town:'Pontorson', note:'Ancien moulin, cuisine traditionnelle', query:'Le Moulin de Beauchamps Pontorson', photo:'https://www.lemoulindebeauchamps.com/wp-content/uploads/2024/05/le-moulin-de-beauchamps-restaurant-viande-granville-moulin-1.webp' },
     ],
     images:[
       { url:`${WI}/e/ef/Mont_St_Michel_in_the_afternoon.jpg/330px-Mont_St_Michel_in_the_afternoon.jpg`, caption:'Le Mont-Saint-Michel', location:'Mont-Saint-Michel' },
       { url:`${WI}/d/df/Mont_Saint-Michel%2C_France_ESA394286.jpg/330px-Mont_Saint-Michel%2C_France_ESA394286.jpg`, caption:'Vue aérienne du Mont', location:'Baie du Mont-Saint-Michel' },
       { url:`${WI}/2/28/Dol-de-Bretagne_-_La_Grande_Rue.jpg/330px-Dol-de-Bretagne_-_La_Grande_Rue.jpg`, caption:'Grande Rue de Dol', location:'Dol-de-Bretagne' },
       { url:`${WI}/9/94/Cancale_03.jpg/330px-Cancale_03.jpg`, caption:'Port de Cancale', location:'Cancale' },
+      { url:`${WI}/0/05/Breizh_35_-_Dol_-_Peulvan_maez_al_lanv_06.jpg/330px-Breizh_35_-_Dol_-_Peulvan_maez_al_lanv_06.jpg`, caption:'Menhir de Champ-Dolent', location:'Dol-de-Bretagne' },
+      { url:`${WI}/e/ee/Vue_%28Le_Mont-Saint-Michel%29_%282%29.jpg/330px-Vue_%28Le_Mont-Saint-Michel%29_%282%29.jpg`, caption:"Vue de l'abbaye", location:'Mont-Saint-Michel' },
+      { url:`${WI}/2/2d/Pontorson_%2850%29_%C3%89glise_Notre-Dame_-_Ext%C3%A9rieur_-_Fa%C3%A7ade_sud_-_02.jpg/330px-Pontorson_%2850%29_%C3%89glise_Notre-Dame_-_Ext%C3%A9rieur_-_Fa%C3%A7ade_sud_-_02.jpg`, caption:'Église Notre-Dame', location:'Pontorson' },
     ],
   },
 };
@@ -574,16 +580,23 @@ export default function WeekEndPlanner() {
           <Label>Pause déjeuner</Label>
           <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {route.lunch.map((l, i) => (
-              <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
-                  <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{l.name}</span>
-                  <a href={`https://www.google.com/maps/search/${encodeURIComponent(l.query)}`} target="_blank" rel="noopener noreferrer"
-                    style={{ color:route.color, display:'flex', alignItems:'center', flexShrink:0 }}>
-                    <ExternalLink size={12} />
-                  </a>
+              <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px', display:'flex', gap:10 }}>
+                {l.photo && (
+                  <img src={l.photo} alt={l.name} loading="lazy"
+                    style={{ width:56, height:56, borderRadius:7, objectFit:'cover', flexShrink:0, background:C.faint }}
+                    onError={e => { e.target.style.display='none'; }} />
+                )}
+                <div style={{ minWidth:0, flex:1 }}>
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+                    <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{l.name}</span>
+                    <a href={`https://www.google.com/maps/search/${encodeURIComponent(l.query)}`} target="_blank" rel="noopener noreferrer"
+                      style={{ color:route.color, display:'flex', alignItems:'center', flexShrink:0 }}>
+                      <ExternalLink size={12} />
+                    </a>
+                  </div>
+                  <div style={{ fontSize:10, color:C.muted, marginTop:2, fontFamily:C.mono }}>{l.town}</div>
+                  <div style={{ fontSize:11, color:'#8899aa', marginTop:4 }}>{l.note}</div>
                 </div>
-                <div style={{ fontSize:10, color:C.muted, marginTop:2, fontFamily:C.mono }}>{l.town}</div>
-                <div style={{ fontSize:11, color:'#8899aa', marginTop:4 }}>{l.note}</div>
               </div>
             ))}
           </div>
