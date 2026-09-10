@@ -111,20 +111,25 @@ const TURN_OFFSET_M = 120;   // on pose le point APRÈS le virage, pas dessus :
 // Plafond : au-delà, certains GPS refusent l'itinéraire. À baisser si le tien râle.
 const MAX_SHAPING_POINTS = 120;
 
-// Faut-il écrire un <rte> ?
+// Que met-on dans le <rte> ? Trois essais successifs sur plan.tomtom.com ont
+// tranché la question :
 //
-// Non, par défaut. Un <rte> de 120 points de forme sert à un GPS qui SUIT une
-// route : il l'empêche de recalculer par ailleurs. Mais un planificateur, lui,
-// LISTE chaque <rtept> comme une étape — plan.tomtom.com affiche « 118 steps »
-// numérotées — et il nomme ces étapes par leur adresse, en ignorant le <name>
-// du fichier. Les points de forme deviennent alors un mur de numéros au milieu
-// duquel le déjeuner et la station sont introuvables.
+//   'shaping' — les 120 points de forme. Le GPS ne peut plus recalculer par
+//               ailleurs, mais un planificateur les liste comme autant
+//               d'étapes : « 118 steps » numérotées, illisible.
+//   'none'    — pas de <rte> du tout. Trace propre, mais plan.tomtom.com
+//               ignore aussi les <wpt> : plus aucun arrêt nulle part.
+//   'stops'   — le <rte> ne contient que les 10 arrêts. Ils apparaissent bien
+//               comme étapes, mais l'outil recalcule le chemin entre eux :
+//               mesuré, les 9 segments divergent, jusqu'à 7,9 km d'écart. Ce
+//               n'est plus la même balade. Écarté.
 //
-// Sans <rte>, le fichier se réduit à ce que tous les outils lisent de la même
-// façon : une trace exacte, et des points nommés. Contrepartie assumée : plus
-// de recalcul guidé si l'on quitte l'itinéraire — la trace montre la route,
-// elle ne la fait pas recalculer.
-const INCLUDE_ROUTE = false;
+// Aucun des trois ne donne à la fois la fidélité du tracé et des arrêts nommés
+// sur ce planificateur-là, parce qu'il nomme les étapes par leur adresse et
+// ignore les <wpt>. On garde donc 'none', qui est le format le plus portable :
+// une trace exacte que tous les outils dessinent pareil, et 12 points nommés
+// que la plupart affichent. plan.tomtom.com est l'exception qui les ignore.
+const ROUTE_MODE = 'none';
 
 function isRealStop(role) {
   return role !== 'shape';
@@ -368,8 +373,16 @@ function buildGpx({ name, trackPoints, routePoints, labels, shaping }) {
   const labelled = labelRoutePoints(labels, shaping);
 
   // <rte> : itinéraire léger, c'est ce qu'un TomTom sait recalculer.
-  const rtepts = routePoints.map((p, i) => {
-    const item = labelled.get(i);
+  // En mode 'stops', les points du <rte> sont les arrêts eux-mêmes. Les deux
+  // restos de repli en sont exclus : ce sont des solutions de rechange, en
+  // faire des étapes forcerait un détour vers chacune d'elles.
+  const rteSource = ROUTE_MODE === 'stops'
+    ? labels.filter(s => s.role !== 'food')
+        .map(s => ({ latitude: s.lat, longitude: s.lon, label: s }))
+    : routePoints.map((p, i) => ({ ...p, label: labelled.get(i) }));
+
+  const rtepts = rteSource.map(p => {
+    const item = p.label;
     if (!item) return `    <rtept lat="${p.latitude}" lon="${p.longitude}"></rtept>`;
     const inner = `<name>${esc(item.name)}</name><desc>${esc(item.desc)}</desc>` +
       `<cmt>${esc(item.desc)}</cmt>` + (item.sym ? `<sym>${esc(item.sym)}</sym>` : '');
@@ -381,7 +394,7 @@ function buildGpx({ name, trackPoints, routePoints, labels, shaping }) {
     `      <trkpt lat="${p.latitude}" lon="${p.longitude}"></trkpt>`
   ).join('\n');
 
-  const rteBlock = INCLUDE_ROUTE ? `  <rte>
+  const rteBlock = ROUTE_MODE !== 'none' ? `  <rte>
     <name>${esc(name)} (itinéraire)</name>
 ${rtepts}
   </rte>
@@ -433,9 +446,7 @@ async function main() {
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
   console.log(`  ${allPoints.length} points bruts -> ${trackPoints.length} points de trace (tolérance ${TRACK_TOLERANCE_M} m)`);
   console.log(`  ${realStops.length} étapes + ${MARKERS.length} repère(s) hors tracé, nommés en <wpt>`);
-  console.log(INCLUDE_ROUTE
-    ? `  <rte> de ${routePoints.length} points de forme (un planificateur les listera comme autant d'étapes)`
-    : `  pas de <rte> : la trace seule, pour que les outils n'affichent pas 120 étapes numérotées`);
+  console.log(`  <rte> en mode '${ROUTE_MODE}'`);
 }
 
 main().catch(err => {
