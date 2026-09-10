@@ -6,92 +6,110 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// Mont-Saint-Michel & Baie day-trip loop, in visiting order.
-// Each stop is a named point of interest (not a plain town-center geocode) so we
-// land on the actual landmark instead of an arbitrary/ambiguous address match.
-// 'address' is only used for home and small towns that aren't themselves a POI.
-// The stop tagged role:'lunch' is the actual chosen restaurant — a fuel stop is
-// auto-inserted right after it (motorcycles average ~200km range, so topping up
-// around the midday break covers the rest of the loop with margin).
-// Reversed order vs. the first pass: Cancale side (the point farthest from home)
-// is visited first, lunch falls near the actual midpoint at Cité d'Alet, and the
-// shorter Dinard/Saint-Cast side is left for the way home — so the final leg
-// back to Hénansal is short instead of a long 57km slog after lunch.
+// Boucle "Argoat", au départ d'Hénansal, dans l'ordre de passage.
+// Argoat = le pays des bois, par opposition à l'Armor, le pays de la mer : c'est
+// exactement le sujet de cette boucle, qui tourne le dos à la côte.
+//
+// Coordonnées saisies en dur plutôt que résolues par recherche POI : la recherche
+// floue s'était déjà trompée de site (une "Pointe du Château" à Perros-Guirec avait
+// renvoyé le Chapeau de Napoléon, à 30 km du vrai lieu). Chaque point ci-dessous a
+// été vérifié individuellement contre sa position attendue.
+//
+// role:
+//   'stop'  -> arrêt réel, apparaît comme étape dans le GPX et le lien Google Maps
+//   'lunch' -> le déjeuner
+//   'fuel'  -> le plein
+//   'shape' -> point de passage qui force le tracé sans être une étape
+//
+// Le rythme vise 40 à 60 min de roulage entre deux arrêts réels : les 'shape'
+// servent justement à allonger les sessions sans multiplier les arrêts.
 const STOPS = [
-  { name: 'Hénansal (départ)', query: 'Hénansal, France', kind: 'address', role: 'stop' },
-  { name: 'Binic', query: 'Port de Binic', kind: 'poi', role: 'stop' },
-  { name: 'Pointe de l\'Arcouest', query: "Pointe de l'Arcouest, Ploubazlanec", kind: 'poi', role: 'stop' },
-  { name: 'Pointe du Château', query: 'Pointe du Château, Perros-Guirec', kind: 'poi', role: 'stop' },
-  { name: "Ploumanac'h (déjeuner)", query: 'Le Men Ruz, Perros-Guirec', kind: 'poi', role: 'lunch' },
-  { name: 'Île Renote', query: 'Île Renote, Trégastel', kind: 'poi', role: 'stop' },
-  { name: 'Guingamp', query: 'Guingamp, France', kind: 'address', role: 'stop' },
-  { name: 'Hénansal (retour)', query: 'Hénansal, France', kind: 'address', role: 'stop' },
+  { name: 'Hénansal (départ)',       lat: 48.5409784, lon: -2.4330858, role: 'stop'  },
+  { name: 'Moncontour',              lat: 48.3611,    lon: -2.6326,    role: 'shape' },
+  { name: 'Mont Bel-Air',            lat: 48.3506,    lon: -2.5498,    role: 'stop'  },
+  { name: 'Le Quillio',              lat: 48.2407,    lon: -2.8825,    role: 'shape' },
+  { name: 'Cascade de Bosméléac',    lat: 48.3002,    lon: -2.9012,    role: 'stop'  },
+  // Sans ce crochet, la descente vers le lac ne fait que 34 min et la session
+  // d'avant-déjeuner tombe sous les 40 min voulues. Il coûte 5 km pour 10 min.
+  { name: 'Saint-Martin-des-Prés',   lat: 48.3060,    lon: -2.9600,    role: 'shape' },
+  { name: 'Gorges du Poulancre',     lat: 48.2539,    lon: -3.0070,    role: 'shape' },
+  { name: 'Beau Rivage (déjeuner)',  lat: 48.2060,    lon: -3.0470,    role: 'lunch' },
+  { name: 'Écluse de Guerlédan',     lat: 48.1900,    lon: -3.0174,    role: 'shape' },
+  { name: 'Anse de Sordan',          lat: 48.2023,    lon: -3.0679,    role: 'shape' },
+  { name: 'Les Forges des Salles',   lat: 48.1996,    lon: -3.1268,    role: 'shape' },
+  { name: 'Abbaye de Bon-Repos',     lat: 48.2128,    lon: -3.1282,    role: 'stop'  },
+  { name: 'Gorges du Daoulas',       lat: 48.2270,    lon: -3.1230,    role: 'shape' },
+  { name: 'Saint-Nicolas-du-Pélem',  lat: 48.3154,    lon: -3.1599,    role: 'shape' },
+  { name: 'Le Haut-Corlay',          lat: 48.3217,    lon: -3.0564,    role: 'shape' },
+  // Le plein se fait ici et pas à mi-parcours : la seule station de la zone du lac
+  // est l'Intermarché de Mûr-de-Bretagne, et le crochet pour l'atteindre ramenait
+  // 7 km de D767 sur le tracé en plus de casser le rythme juste avant le déjeuner.
+  { name: 'Quintin (plein)',         lat: 48.4033,    lon: -2.9100,    role: 'fuel'  },
+  { name: 'Hénansal (retour)',       lat: 48.5409784, lon: -2.4330858, role: 'stop'  },
 ];
 
-// Output path for the generated GPX track.
-const GPX_OUTPUT_PATH = new URL('../public/granit-rose.gpx', import.meta.url);
+const ROUTE_NAME = 'Argoat — Guerlédan & gorges du Daoulas';
+const GPX_OUTPUT_PATH = new URL('../public/trace.gpx', import.meta.url);
 
-const HILLINESS = 'normal';
-const WINDINGNESS = 'normal';
+// 'high' sur les deux : sur ce même tracé, passer de 'normal' à 'high' rallonge
+// nettement la part de voies communales sans coûter de temps.
+const HILLINESS = 'high';
+const WINDINGNESS = 'high';
 
-// How many via-points to sample from the computed route for the Google Maps link.
-const SAMPLE_COUNT = 12;
+// Tolérance de simplification de la trace, en mètres. La trace brute fait plusieurs
+// milliers de points ; un GPS moto n'en a pas besoin d'autant pour suivre la route.
+const TRACK_TOLERANCE_M = 12;
 
-// Radius to look for a fuel stop around the lunch spot.
-const FUEL_SEARCH_RADIUS_M = 6000;
+// Nombre de points de forme de l'itinéraire <rte>, destiné à l'import TomTom.
+const ROUTE_SHAPING_POINTS = 40;
 
-// Bias POI search near home so fuzzy matches don't jump to a same-named but
-// far-away landmark (e.g. "Gorges du Daoulas" matching "Gorges du Verdon").
-const HOME_BIAS = { lat: 48.5410, lon: -2.4331, radius: 150000 };
-
-async function searchPOI(query) {
-  const url = `https://api.tomtom.com/search/2/search/${encodeURIComponent(query)}.json` +
-    `?key=${API_KEY}&idxSet=POI&countrySet=FR&limit=3` +
-    `&lat=${HOME_BIAS.lat}&lon=${HOME_BIAS.lon}&radius=${HOME_BIAS.radius}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`POI search failed for "${query}": ${res.status} ${await res.text()}`);
-  const data = await res.json();
-  const candidates = data.results || [];
-  if (!candidates.length) throw new Error(`No POI match for "${query}" — try a more specific name.`);
-
-  const top = candidates[0];
-  console.log(`  ${query} ->`);
-  candidates.forEach((c, i) => {
-    const marker = i === 0 ? '✓' : ' ';
-    console.log(`    ${marker} ${c.poi?.name} [${c.poi?.categories?.join(', ')}] — ${c.position.lat},${c.position.lon}`);
-  });
-  return { lat: top.position.lat, lon: top.position.lon };
+function isRealStop(role) {
+  return role !== 'shape';
 }
 
-async function geocodeAddress(query) {
-  const url = `https://api.tomtom.com/search/2/geocode/${encodeURIComponent(query)}.json?key=${API_KEY}&limit=1`;
+async function calculateRoute() {
+  const locations = STOPS.map(s => `${s.lat},${s.lon}`).join(':');
+  const url = `https://api.tomtom.com/routing/1/calculateRoute/${locations}/json` +
+    `?key=${API_KEY}&travelMode=motorcycle&routeType=thrilling` +
+    `&hilliness=${HILLINESS}&windingness=${WINDINGNESS}` +
+    // traffic=false : sans ça les durées intègrent le trafic à l'instant du calcul et
+    // le chiffre publié sur le site dérive d'un run à l'autre.
+    `&traffic=false&instructionsType=text&language=fr-FR`;
+
   const res = await fetch(url);
-  if (!res.ok) throw new Error(`Geocode failed for "${query}": ${res.status} ${await res.text()}`);
-  const data = await res.json();
-  const hit = data.results?.[0];
-  if (!hit) throw new Error(`No geocode result for "${query}"`);
-  console.log(`  ${query} -> ${hit.position.lat},${hit.position.lon}`);
-  return { lat: hit.position.lat, lon: hit.position.lon };
+  if (!res.ok) throw new Error(`Routing failed: ${res.status} ${await res.text()}`);
+  return (await res.json()).routes[0];
 }
 
-async function nearbyFuelStop(near) {
-  const url = `https://api.tomtom.com/search/2/categorySearch/gas%20station.json` +
-    `?key=${API_KEY}&lat=${near.lat}&lon=${near.lon}&radius=${FUEL_SEARCH_RADIUS_M}&limit=3`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Fuel search failed: ${res.status} ${await res.text()}`);
-  const data = await res.json();
-  const candidates = data.results || [];
-  if (!candidates.length) {
-    console.log(`  ⚠ No gas station found within ${FUEL_SEARCH_RADIUS_M / 1000}km of lunch stop — skipping fuel stop.`);
-    return null;
+// Douglas-Peucker sur la distance perpendiculaire, en degrés (suffisant à cette échelle).
+function simplify(points, toleranceM) {
+  const tol = toleranceM / 111320;
+  if (points.length < 3) return points;
+
+  const perpendicular = (p, a, b) => {
+    const dx = b.longitude - a.longitude, dy = b.latitude - a.latitude;
+    if (dx === 0 && dy === 0) return Math.hypot(p.longitude - a.longitude, p.latitude - a.latitude);
+    const t = ((p.longitude - a.longitude) * dx + (p.latitude - a.latitude) * dy) / (dx * dx + dy * dy);
+    const c = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.longitude - (a.longitude + c * dx), p.latitude - (a.latitude + c * dy));
+  };
+
+  const keep = new Uint8Array(points.length);
+  keep[0] = keep[points.length - 1] = 1;
+  const stack = [[0, points.length - 1]];
+  while (stack.length) {
+    const [first, last] = stack.pop();
+    let maxDist = 0, index = -1;
+    for (let i = first + 1; i < last; i++) {
+      const d = perpendicular(points[i], points[first], points[last]);
+      if (d > maxDist) { maxDist = d; index = i; }
+    }
+    if (maxDist > tol && index !== -1) {
+      keep[index] = 1;
+      stack.push([first, index], [index, last]);
+    }
   }
-  const top = candidates[0];
-  console.log('  Fuel stop ->');
-  candidates.forEach((c, i) => {
-    const marker = i === 0 ? '✓' : ' ';
-    console.log(`    ${marker} ${c.poi?.name} — ${c.address?.freeformAddress} — ${Math.round(c.dist)}m — ${c.position.lat},${c.position.lon}`);
-  });
-  return { lat: top.position.lat, lon: top.position.lon };
+  return points.filter((_, i) => keep[i]);
 }
 
 function sampleEvenly(points, count) {
@@ -100,88 +118,116 @@ function sampleEvenly(points, count) {
   return Array.from({ length: count }, (_, i) => points[Math.round(i * stride)]);
 }
 
-async function main() {
-  console.log('Resolving stops (POIs & addresses)...');
-  const coords = [];
-  const labels = [];
-  const names = [];
-  for (const stop of STOPS) {
-    const c = stop.kind === 'poi' ? await searchPOI(stop.query) : await geocodeAddress(stop.query);
-    coords.push(c);
-    labels.push(stop.query);
-    names.push(stop.name || stop.query);
-    await new Promise(r => setTimeout(r, 500));
-
-    if (stop.role === 'lunch') {
-      const fuel = await nearbyFuelStop(c);
-      if (fuel) { coords.push(fuel); labels.push('(fuel stop)'); names.push('Station-service'); }
-      await new Promise(r => setTimeout(r, 500));
-    }
-  }
-
-  const locations = coords.map(c => `${c.lat},${c.lon}`).join(':');
-  const routeUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locations}/json` +
-    `?key=${API_KEY}&travelMode=motorcycle&routeType=thrilling&hilliness=${HILLINESS}&windingness=${WINDINGNESS}` +
-    `&instructionsType=text&language=fr-FR`;
-
-  console.log('\nCalling TomTom Routing API (thrilling / motorcycle)...');
-  const res = await fetch(routeUrl);
-  if (!res.ok) throw new Error(`Routing failed: ${res.status} ${await res.text()}`);
-  const data = await res.json();
-  const route = data.routes[0];
-
-  const summary = route.summary;
-  const distanceKm = Math.round(summary.lengthInMeters / 1000);
-  const hours = Math.floor(summary.travelTimeInSeconds / 3600);
-  const minutes = Math.round((summary.travelTimeInSeconds % 3600) / 60);
-  console.log(`\nDistance: ${distanceKm} km — Durée estimée: ${hours}h${String(minutes).padStart(2, '0')}`);
-
-  console.log('\nPer-leg cumulative distance:');
-  let cumulative = 0;
-  route.legs.forEach((leg, i) => {
-    cumulative += leg.summary.lengthInMeters;
-    const pct = Math.round((cumulative / summary.lengthInMeters) * 100);
-    console.log(`  -> ${labels[i + 1]}: +${Math.round(leg.summary.lengthInMeters / 1000)}km (cumulative ${Math.round(cumulative / 1000)}km, ${pct}%)`);
-  });
-
-  if (route.guidance?.instructions) {
-    const roads = [...new Set(
-      route.guidance.instructions.map(ins => ins.roadNumbers?.[0] || ins.street).filter(Boolean)
-    )];
-    console.log('\nRoad numbers / streets used:', roads.join(', '));
-  }
-
-  const allPoints = route.legs.flatMap(leg => leg.points);
-  const sampled = sampleEvenly(allPoints, SAMPLE_COUNT).map(p => `${p.latitude},${p.longitude}`);
-
-  const mapsUrl = `https://www.google.com/maps/dir/${sampled.join('/')}`;
-  console.log(`\nGoogle Maps: ${mapsUrl}`);
-
-  const gpx = buildGpx({ name: 'Côte de Granit Rose', coords, names, trackPoints: allPoints });
-  writeFileSync(GPX_OUTPUT_PATH, gpx);
-  console.log(`\nGPX written to ${GPX_OUTPUT_PATH.pathname} (${allPoints.length} track points, ${coords.length} waypoints)`);
+function formatDuration(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return `${h}h${String(m).padStart(2, '0')}`;
 }
 
-function buildGpx({ name, coords, names, trackPoints }) {
+function reportLegs(route) {
+  console.log('\nDétail par tronçon (cumul de roulage entre arrêts réels) :');
+  let cumulativeM = 0;
+  let sinceStopS = 0;
+  route.legs.forEach((leg, i) => {
+    const to = STOPS[i + 1];
+    cumulativeM += leg.summary.lengthInMeters;
+    sinceStopS += leg.summary.travelTimeInSeconds;
+    const km = Math.round(leg.summary.lengthInMeters / 1000);
+    const min = Math.round(leg.summary.travelTimeInSeconds / 60);
+    const marker = isRealStop(to.role) ? '●' : '·';
+    let line = `  ${marker} ${to.name.padEnd(28)} +${String(km).padStart(3)}km ${String(min).padStart(3)}min` +
+      `   cumul ${String(Math.round(cumulativeM / 1000)).padStart(3)}km`;
+    if (isRealStop(to.role)) {
+      line += `   << session de ${Math.round(sinceStopS / 60)} min`;
+      sinceStopS = 0;
+    }
+    console.log(line);
+  });
+}
+
+function reportRoads(route) {
+  const instructions = route.guidance?.instructions ?? [];
+  const total = route.summary.lengthInMeters;
+  const byRoad = {};
+  instructions.forEach((ins, i) => {
+    const start = ins.routeOffsetInMeters;
+    const end = i + 1 < instructions.length ? instructions[i + 1].routeOffsetInMeters : total;
+    const key = ins.roadNumbers?.[0] ?? 'voies communales';
+    byRoad[key] = (byRoad[key] ?? 0) + (end - start);
+  });
+  const top = Object.entries(byRoad)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([road, m]) => `${road} ${(m / 1000).toFixed(1)}km`);
+  console.log('\nRoutes les plus empruntées :', top.join(', '));
+
+  // Garde-fou : ces axes sont les voies rapides du secteur, on ne veut pas les voir.
+  const fastRoads = ['N12', 'N164', 'D700', 'D712', 'D767', 'E50'];
+  const found = fastRoads.filter(r => byRoad[r]).map(r => `${r} ${(byRoad[r] / 1000).toFixed(1)}km`);
+  console.log(found.length ? `⚠ Voies rapides sur le tracé : ${found.join(', ')}` : '✓ Aucune voie rapide sur le tracé');
+}
+
+function buildGpx({ name, trackPoints, routePoints }) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const wpts = coords.map((c, i) =>
-    `  <wpt lat="${c.lat}" lon="${c.lon}"><name>${esc(names[i])}</name></wpt>`
+
+  // Les arrêts réels seulement : les points de forme n'ont rien à faire dans le roadbook.
+  const wpts = STOPS.filter(s => isRealStop(s.role)).map(s =>
+    `  <wpt lat="${s.lat}" lon="${s.lon}"><name>${esc(s.name)}</name><type>${s.role}</type></wpt>`
   ).join('\n');
+
+  // <rte> : itinéraire léger, c'est ce qu'un TomTom sait recalculer.
+  const rtepts = routePoints.map(p =>
+    `    <rtept lat="${p.latitude}" lon="${p.longitude}"></rtept>`
+  ).join('\n');
+
+  // <trk> : la trace fidèle, pour vérifier le tracé exact.
   const trkpts = trackPoints.map(p =>
     `      <trkpt lat="${p.latitude}" lon="${p.longitude}"></trkpt>`
   ).join('\n');
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
   <metadata><name>${esc(name)}</name></metadata>
 ${wpts}
+  <rte>
+    <name>${esc(name)} (itinéraire)</name>
+${rtepts}
+  </rte>
   <trk>
-    <name>${esc(name)}</name>
+    <name>${esc(name)} (trace)</name>
     <trkseg>
 ${trkpts}
     </trkseg>
   </trk>
 </gpx>
 `;
+}
+
+async function main() {
+  console.log(`Calcul TomTom — ${ROUTE_NAME} (motorcycle / thrilling / ${HILLINESS} / ${WINDINGNESS})`);
+  const route = await calculateRoute();
+
+  const { lengthInMeters, travelTimeInSeconds } = route.summary;
+  console.log(`\nDistance : ${Math.round(lengthInMeters / 1000)} km — Roulage : ${formatDuration(travelTimeInSeconds)}`);
+
+  reportLegs(route);
+  reportRoads(route);
+
+  const allPoints = route.legs.flatMap(leg => leg.points);
+  const trackPoints = simplify(allPoints, TRACK_TOLERANCE_M);
+  const routePoints = sampleEvenly(trackPoints, ROUTE_SHAPING_POINTS);
+
+  // Lien Google Maps construit sur les arrêts réels, pas sur des points échantillonnés
+  // au hasard dans la trace : au moins les étapes y sont, même si Google recalcule
+  // l'itinéraire entre elles à sa façon.
+  const realStops = STOPS.filter(s => isRealStop(s.role));
+  const mapsUrl = `https://www.google.com/maps/dir/${realStops.map(s => `${s.lat},${s.lon}`).join('/')}`;
+  console.log(`\nGoogle Maps (aperçu, ${realStops.length} étapes) : ${mapsUrl}`);
+
+  writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints }));
+  console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
+  console.log(`  ${allPoints.length} points bruts -> ${trackPoints.length} points de trace (tolérance ${TRACK_TOLERANCE_M} m)`);
+  console.log(`  ${routePoints.length} points de forme dans <rte>, ${realStops.length} étapes en <wpt>`);
 }
 
 main().catch(err => {

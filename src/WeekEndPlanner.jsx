@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ExternalLink, Camera, Navigation, Clock, Map, Download } from 'lucide-react';
+import { MapPin, ExternalLink, Camera, Navigation, Clock, Map, Download, Fuel, Phone, Timer } from 'lucide-react';
 
 /* ─── Design tokens ─────────────────────────────────────────── */
 const C = {
@@ -19,50 +19,103 @@ const C = {
 /* Wikipedia Commons base */
 const WI = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
 
-/* ─── Data: Côte de Granit Rose, boucle journée au départ d'Hénansal ── */
+/* ─── Data: Argoat, boucle journée au départ d'Hénansal ──────────────────────
+ *
+ * Argoat = le pays des bois en breton, par opposition à l'Armor, le pays de la
+ * mer. C'est le sujet de la boucle : elle tourne le dos à la côte.
+ *
+ * Le rythme est la contrainte structurante : minimum 40-45 min de roulage entre
+ * deux arrêts. D'où le petit nombre d'arrêts et les nombreuses traversées — les
+ * lieux listés en `via` sont vus depuis la selle, on ne s'y arrête pas.
+ * Distance et durée viennent de scripts/tomtom-scenic-route.mjs (traffic=false).
+ */
 const ROUTE = {
-  title: 'Côte de Granit Rose',
-  subtitle: "Binic, Perros-Guirec, Ploumanac'h & Trégastel",
-  color: '#fb7185', colorDark: '#f43f5e',
-  distance: '263 km', driveTime: '6h42',
-  googleMapsUrl: 'https://www.google.com/maps/dir/48.54098,-2.43309/48.48887,-2.69472/48.60023,-2.82587/48.71353,-3.0221/48.79006,-3.04907/48.77542,-3.29324/48.8317,-3.48334/48.73392,-3.4332/48.62634,-3.16895/48.54406,-2.96631/48.49494,-2.71581/48.54098,-2.43309',
-  gpxUrl: '/granit-rose.gpx',
+  title: 'Argoat',
+  subtitle: 'Mont Bel-Air, Guerlédan, gorges du Poulancre & du Daoulas',
+  color: '#34d399', colorDark: '#10b981',
+  distance: '227 km', driveTime: '5h20', dayLength: '9h20',
+  day: 'Samedi',
+  googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
+  gpxUrl: '/trace.gpx',
   waypoints: [
-    { name: 'Hénansal',          type: 'start', time: '9h00',  day: 'Départ' },
-    { name: 'Binic',             type: 'stop',  time: '~10h15', day: 'Matin' },
-    { name: "Pointe de l'Arcouest", type: 'stop', time: '~11h25', day: 'Matin' },
-    { name: 'Pointe du Château', type: 'stop',  time: '~12h55', day: 'Matin' },
-    { name: "Ploumanac'h",       type: 'lunch', time: '13h10–14h25', day: 'Déjeuner' },
-    { name: 'Station-service',   type: 'stop',  time: '~14h35', day: 'Ravitaillement' },
-    { name: 'Île Renote',        type: 'stop',  time: '~14h45', day: 'Après-midi' },
-    { name: 'Guingamp',          type: 'stop',  time: '~16h20', day: 'Après-midi' },
-    { name: 'Hénansal',          type: 'end',   time: '~18h15', day: 'Retour' },
+    { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
+    { name: 'Mont Bel-Air', type: 'stop', time: '9h44', ride: '44 min', pause: '25 min',
+      day: 'Panorama, 339 m', via: ['Moncontour'] },
+    { name: 'Cascade de Bosméléac', type: 'stop', time: '11h01', ride: '52 min', pause: '25 min',
+      day: 'Lac, barrage & aqueduc', via: ['Le Quillio'] },
+    { name: 'Beau Rivage', type: 'lunch', time: '12h12', ride: '46 min', pause: '1h30',
+      day: 'Déjeuner au bord du lac', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
+    { name: 'Abbaye de Bon-Repos', type: 'stop', time: '14h39', ride: '57 min', pause: '1h00',
+      day: 'Abbaye + gorges du Daoulas', via: ['Écluse de Guerlédan', 'Anse de Sordan', 'Les Forges des Salles'] },
+    { name: 'Quintin', type: 'fuel', time: '16h39', ride: '60 min', pause: '40 min',
+      day: 'Plein + cité de caractère', via: ['Gorges du Daoulas', 'Saint-Nicolas-du-Pélem', 'Le Haut-Corlay'] },
+    { name: 'Hénansal', type: 'end', time: '18h20', ride: '61 min', day: 'Retour' },
   ],
   highlights: [
-    '🌸 Rochers de granit rose, Île Renote',
-    '⛵ Port de Binic, mise en jambes côtière',
-    "🏝️ Vue sur l'archipel de Bréhat, Pointe de l'Arcouest",
-    '🗿 Chapeau de Napoléon, Pointe du Château',
-    "🗼 Ploumanac'h & son phare, pause déjeuner",
+    '⛰️ Mont Bel-Air, 339 m — le toit de l’est du département',
+    '💧 Cascade et barrage de Bosméléac, sur l’aqueduc',
+    '🌊 Tour complet du lac de Guerlédan, rives nord et sud',
+    '🏛️ Abbaye de Bon-Repos, ruines cisterciennes sur le Blavet',
+    '🪨 Gorges du Daoulas — barres de schiste dressées, 7 km de D44',
+  ],
+  roads: [
+    { name: 'Voies communales', km: '55,9 km' },
+    { name: 'D768', km: '30,2 km' },
+    { name: 'D28', km: '29,4 km' },
+    { name: 'D35', km: '24,5 km' },
+    { name: 'D15b', km: '8,8 km' },
+    { name: 'D44 (gorges du Daoulas)', km: '6,9 km' },
   ],
   lunch: [
-    { name: 'Crêperie du Ranolien', town: "Ploumanac'h, camping Le Ranolien", note: 'Galettes & crêpes, petit budget (~9€/pers), 4.6-4.7/5', query: "Crêperie du Ranolien Ploumanac'h", photo: 'https://img02.restaurantguru.com/ceab-Creperie-du-Ranolien-Perros-Guirec-meals.jpg' },
-    { name: 'Le Bistrot du Port', town: "Port de Ploumanac'h", note: 'Crêperie simple, vue sur le port, prix très raisonnables', query: "Crêperie Le Bistrot du Port Ploumanac'h", photo: 'https://img02.restaurantguru.com/c729-Creperie-Le-Bistrot-du-Port-Perros-Guirec-exterior.jpg' },
-    { name: 'Le Mao', town: "Ploumanac'h", note: 'Crêpes & fruits de mer, bon rapport qualité-prix, moules-frites ~8€', query: "Restaurant Le Mao Ploumanac'h", photo: 'https://img02.restaurantguru.com/c2f5-Restaurant-Le-Mao-panna-cotta.jpg' },
+    { name: 'Hôtel Restaurant Le Beau Rivage', town: 'Beau Rivage, 22530 Caurel',
+      hours: 'Samedi 9h — minuit', phone: '02 96 28 52 15',
+      note: 'Service large : aucun stress si tu arrives en retard.',
+      query: 'Hôtel Restaurant Le Beau Rivage Caurel' },
+    { name: "L'Embarcadère", town: 'Beau Rivage, 22530 Caurel',
+      hours: 'Samedi 9h — minuit', phone: '02 96 28 52 64',
+      note: 'Les Vedettes de Guerlédan, au ponton.',
+      query: "Restaurant l'Embarcadère Beau Rivage Caurel" },
+    { name: "Cap'Tain Cook", town: '56 Rue Roc Hell, 22530 Caurel',
+      hours: 'Samedi 9h — 22h', phone: '02 96 67 11 00',
+      note: 'Repli si les deux premiers sont complets.',
+      query: "Cap'Tain Cook Caurel" },
   ],
+  lunchWarning: "À éviter : l'Auberge de Guerlédan ne sert que de 12h à 13h. Horaires issus de la base TomTom, déclaratifs — appelle pour réserver.",
+  coffee: { name: "Café de l'Abbaye", town: 'Bon-Repos-sur-Blavet', phone: '02 96 24 91 06',
+    hours: '10h — 19h en continu, 7j/7', note: 'À 179 m de l’abbaye : le café de 14h39.' },
+  fuel: {
+    name: 'Système U', town: 'Rue de la Corderie, 22800 Quintin',
+    hours: 'Samedi 9h — 22h', at: 'km 179 (79 %)',
+    why: "Le plein à mi-parcours imposait un crochet par l'Intermarché de Mûr-de-Bretagne : 7,3 km de D767 en plus et une session de 31 min juste avant le déjeuner. Supprimé.",
+    backup: "Filet de sécurité : Intermarché de Mûr-de-Bretagne (7j/7, 9h-19h), à 4 km du restaurant.",
+    warning: "Ne compte pas sur la TotalEnergies de Bon-Repos : samedi 9h-12h seulement, on y passe vers 14h30.",
+  },
+  /* Galerie dans l'ordre de la journée. Chaque vignette a été regardée avant
+   * d'être retenue : la première version puisait dans le fonds numérisé des
+   * Archives départementales (AD22 / 16FI), c'est-à-dire des cartes postales
+   * anciennes en noir et blanc. Ici, photos couleur uniquement. */
   images: [
-    { url: `${WI}/c/c0/Port_de_Ploum_2.JPG/330px-Port_de_Ploum_2.JPG`, caption: "Port de Ploumanac'h", location: "Ploumanac'h" },
-    { url: `${WI}/8/8b/Perros-Guirec_-_La_C%C3%B4te_de_granit_rose_et_le_phare_de_Ploumanac%27h_-_Juin_2005.jpg/330px-Perros-Guirec_-_La_C%C3%B4te_de_granit_rose_et_le_phare_de_Ploumanac%27h_-_Juin_2005.jpg`, caption: 'Côte de granit rose & phare', location: 'Perros-Guirec' },
-    { url: `${WI}/a/ae/France_Cotes_d_Armor_Cote_de_granit_rose_04.jpg/330px-France_Cotes_d_Armor_Cote_de_granit_rose_04.jpg`, caption: 'Rochers de granit rose', location: "Côtes-d'Armor" },
-    { url: `${WI}/7/73/Brehat.jpg/330px-Brehat.jpg`, caption: "Vue sur l'archipel de Bréhat", location: "Pointe de l'Arcouest" },
-    { url: `${WI}/1/12/Binic_-_Avant_port_%C3%A0_marr%C3%A9e_basse.jpg/330px-Binic_-_Avant_port_%C3%A0_marr%C3%A9e_basse.jpg`, caption: 'Avant-port de Binic à marée basse', location: 'Binic' },
-    { url: `${WI}/4/4e/PSIMG_4128.JPG/330px-PSIMG_4128.JPG`, caption: "Rochers de l'Île Renote", location: 'Trégastel' },
-    { url: `${WI}/f/f3/France-Perros-Guirec-sentier_littoral.JPG/330px-France-Perros-Guirec-sentier_littoral.JPG`, caption: 'Sentier littoral', location: 'Perros-Guirec' },
+    { url: `${WI}/6/6e/Street-art_%40_Moncontour.jpg/500px-Street-art_%40_Moncontour.jpg`, caption: 'Coccinelles peintes dans un mur', location: 'Moncontour' },
+    { url: `${WI}/0/05/%C3%89tang_de_la_Touche_%28Tr%C3%A9bry%2C_22%29_-_001.jpg/500px-%C3%89tang_de_la_Touche_%28Tr%C3%A9bry%2C_22%29_-_001.jpg`, caption: 'Étang de la Touche', location: 'Trébry, sous le Mont Bel-Air' },
+    { url: `${WI}/4/4f/Saint_Gilles_Vieux_March%C3%A9_05.JPG/500px-Saint_Gilles_Vieux_March%C3%A9_05.JPG`, caption: 'Le bourg fleuri', location: 'Saint-Gilles-Vieux-Marché' },
+    { url: `${WI}/4/47/455_Lac_de_Guerl%C3%A9dan.jpg/500px-455_Lac_de_Guerl%C3%A9dan.jpg`, caption: 'Lac de Guerlédan depuis les rochers', location: 'Caurel' },
+    { url: `${WI}/6/6f/Zone_d%27escalade_sur_le_lac_de_Guerl%C3%A9dan.jpg/500px-Zone_d%27escalade_sur_le_lac_de_Guerl%C3%A9dan.jpg`, caption: 'Falaise d’escalade sur le lac', location: 'Guerlédan' },
+    { url: `${WI}/3/3f/Bretagne%2C_Les_Forges_des_Salles-2266.jpg/500px-Bretagne%2C_Les_Forges_des_Salles-2266.jpg`, caption: 'Hortensias et vélo rouillé', location: 'Les Forges des Salles' },
+    { url: `${WI}/c/c2/Abbaye_Notre-Dame-de-Bon-Repos%2C_Saint-Gelven%2C_France.jpg/500px-Abbaye_Notre-Dame-de-Bon-Repos%2C_Saint-Gelven%2C_France.jpg`, caption: 'L’allée de l’abbaye', location: 'Bon-Repos, Saint-Gelven' },
+    { url: `${WI}/0/09/451_Blavet_pr%C3%A8s_de_Bon_Repos.jpg/500px-451_Blavet_pr%C3%A8s_de_Bon_Repos.jpg`, caption: 'Le Blavet en contrebas', location: 'Bon-Repos' },
+    { url: `${WI}/2/26/Panorama_quintin.jpg/500px-Panorama_quintin.jpg`, caption: 'Le château de Quintin', location: 'Quintin' },
   ],
 };
 
 /* ─── Helpers ────────────────────────────────────────────────── */
 const isLunchWp = t => t === 'lunch';
+const isEdgeWp  = t => t === 'start' || t === 'end';
+
+const dotColor = (type, route) =>
+  isEdgeWp(type) ? '#ef4444'
+  : isLunchWp(type) ? route.color
+  : type === 'fuel' ? '#f59e0b'
+  : C.borderHi;
 
 const Label = ({ children, style }) => (
   <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.18em', color:C.muted, textTransform:'uppercase', marginBottom:8, ...style }}>
@@ -70,7 +123,7 @@ const Label = ({ children, style }) => (
   </div>
 );
 
-/* ─── Route Banner (replaces map) ───────────────────────────── */
+/* ─── Route Banner ──────────────────────────────────────────── */
 const RouteBanner = ({ route }) => {
   const wps = route.waypoints;
   return (
@@ -89,34 +142,32 @@ const RouteBanner = ({ route }) => {
           <div style={{ fontSize:12, color:'#7a8fa0', marginTop:4, fontFamily:C.sans }}>{route.subtitle}</div>
         </div>
         <div style={{ display:'flex', gap:16, alignItems:'center', flexShrink:0 }}>
-          <div style={{ textAlign:'right' }}>
-            <div style={{ fontFamily:C.mono, fontSize:'1.4rem', color:route.color, lineHeight:1 }}>
-              {route.distance}
-            </div>
-            <div style={{ fontFamily:C.mono, fontSize:8, letterSpacing:'0.18em', color:C.muted, marginTop:2 }}>DISTANCE</div>
-          </div>
-          <div style={{ width:1, height:32, background:C.border }} />
-          <div>
-            <div style={{ fontFamily:C.mono, fontSize:'1.4rem', color:route.color, lineHeight:1 }}>
-              {route.driveTime}
-            </div>
-            <div style={{ fontFamily:C.mono, fontSize:8, letterSpacing:'0.18em', color:C.muted, marginTop:2 }}>DURÉE</div>
-          </div>
+          {[
+            { val:route.distance,  lbl:'DISTANCE' },
+            { val:route.driveTime, lbl:'ROULAGE' },
+            { val:route.dayLength, lbl:'JOURNÉE' },
+          ].map(({ val, lbl }, i) => (
+            <React.Fragment key={lbl}>
+              {i > 0 && <div style={{ width:1, height:32, background:C.border }} />}
+              <div>
+                <div style={{ fontFamily:C.mono, fontSize:'1.4rem', color:route.color, lineHeight:1 }}>{val}</div>
+                <div style={{ fontFamily:C.mono, fontSize:8, letterSpacing:'0.18em', color:C.muted, marginTop:2 }}>{lbl}</div>
+              </div>
+            </React.Fragment>
+          ))}
         </div>
       </div>
 
-      {/* Visual waypoints strip */}
+      {/* Visual waypoints strip — la durée de roulage figure sur le lien, pas sur le point */}
       <div style={{ overflowX:'auto', paddingBottom:4 }}>
         <div style={{ display:'flex', alignItems:'flex-start', minWidth:'max-content', gap:0 }}>
           {wps.map((wp, i) => {
-            const isStart = wp.type==='start';
-            const isEnd   = wp.type==='end';
-            const isHi    = isLunchWp(wp.type);
-            const dotCol  = (isStart||isEnd) ? '#ef4444' : isHi ? route.color : C.borderHi;
-            const isLast  = i === wps.length-1;
+            const isHi   = isLunchWp(wp.type);
+            const dotCol = dotColor(wp.type, route);
+            const isLast = i === wps.length - 1;
+            const next   = wps[i + 1];
             return (
               <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:0 }}>
-                {/* Dot + label */}
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
                   <div style={{
                     width: isHi?11:8, height: isHi?11:8, borderRadius:'50%',
@@ -127,23 +178,32 @@ const RouteBanner = ({ route }) => {
                   <div style={{ textAlign:'center' }}>
                     <div style={{
                       fontFamily:C.mono, fontSize:12, fontWeight:800, whiteSpace:'nowrap',
-                      color: isHi?C.bg:(isStart||isEnd)?'#fff':route.color,
-                      background: isHi?route.color:(isStart||isEnd)?'#ef4444':`${route.color}18`,
+                      color: isHi?C.bg:isEdgeWp(wp.type)?'#fff':route.color,
+                      background: isHi?route.color:isEdgeWp(wp.type)?'#ef4444':`${route.color}18`,
                       padding:'3px 8px', borderRadius:6, lineHeight:1.3,
                     }}>
                       {wp.time}
                     </div>
-                    <div style={{ fontSize:11, color:isHi?route.color:(isStart||isEnd)?'#ef4444':C.text,
+                    <div style={{ fontSize:11, color:isHi?route.color:isEdgeWp(wp.type)?'#ef4444':C.text,
                       fontWeight: isHi?600:400, whiteSpace:'nowrap', lineHeight:1.2, marginTop:5 }}>
                       {wp.name}
                     </div>
+                    {wp.pause && (
+                      <div style={{ fontFamily:C.mono, fontSize:9, color:C.muted, marginTop:3 }}>
+                        pause {wp.pause}
+                      </div>
+                    )}
                   </div>
                 </div>
-                {/* Connector line */}
                 {!isLast && (
-                  <div style={{ display:'flex', alignItems:'center', height:10, marginTop:3, marginLeft:-1 }}>
-                    <div style={{ height:1.5, width:40, background:`linear-gradient(to right, ${dotCol}60, ${C.borderHi}60)` }} />
-                    <div style={{ width:3, height:3, borderTop:`1.5px solid ${C.borderHi}60`, borderRight:`1.5px solid ${C.borderHi}60`, transform:'rotate(45deg)', marginLeft:-2 }} />
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginTop:-2, minWidth:74 }}>
+                    <div style={{ display:'flex', alignItems:'center', height:12 }}>
+                      <div style={{ height:1.5, width:52, background:`linear-gradient(to right, ${dotCol}60, ${C.borderHi}60)` }} />
+                      <div style={{ width:3, height:3, borderTop:`1.5px solid ${C.borderHi}60`, borderRight:`1.5px solid ${C.borderHi}60`, transform:'rotate(45deg)', marginLeft:-2 }} />
+                    </div>
+                    <div style={{ fontFamily:C.mono, fontSize:9, color:route.color, opacity:.75, marginTop:3, whiteSpace:'nowrap' }}>
+                      {next.ride}
+                    </div>
                   </div>
                 )}
               </div>
@@ -152,12 +212,11 @@ const RouteBanner = ({ route }) => {
         </div>
       </div>
 
-      {/* Google Maps CTA */}
+      {/* CTAs */}
       <div style={{ marginTop:20, display:'flex', gap:10, flexWrap:'wrap' }}>
         <a
-          href={route.googleMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
+          href={route.gpxUrl}
+          download
           style={{
             display:'inline-flex', alignItems:'center', gap:10,
             padding:'13px 22px', borderRadius:12,
@@ -170,13 +229,13 @@ const RouteBanner = ({ route }) => {
           onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; e.currentTarget.style.boxShadow=`0 6px 32px ${route.color}70`; }}
           onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=`0 4px 24px ${route.color}50`; }}
         >
-          <Map size={16} />
-          Ouvrir l'itinéraire dans Google Maps
-          <ExternalLink size={13} style={{ opacity:0.7 }} />
+          <Download size={16} />
+          Télécharger la trace GPX
         </a>
         <a
-          href={route.gpxUrl}
-          download
+          href={route.googleMapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
           style={{
             display:'inline-flex', alignItems:'center', gap:10,
             padding:'13px 22px', borderRadius:12,
@@ -189,12 +248,14 @@ const RouteBanner = ({ route }) => {
           onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
           onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
         >
-          <Download size={16} />
-          Télécharger la trace GPX
+          <Map size={16} />
+          Aperçu Google Maps
+          <ExternalLink size={13} style={{ opacity:0.7 }} />
         </a>
       </div>
-      <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em' }}>
-        NAVIGATION GPS COMPLÈTE · TOUTES ÉTAPES INCLUSES
+      <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
+        GPX = NAVIGATION · 7 ÉTAPES, ITINÉRAIRE 40 POINTS, TRACE 1168 POINTS<br />
+        GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>
   );
@@ -232,20 +293,18 @@ const Gallery = ({ route }) => (
   </div>
 );
 
-/* ─── Main export ────────────────────────────────────────────── */
-export default function WeekEndPlanner() {
-  const route = ROUTE;
-  const wps = route.waypoints.slice(0, -1);
-
-  const SidebarInfoBlock = () => (
+/* ─── Bloc d'infos, partagé entre la sidebar desktop et le flux mobile ── */
+const SidebarInfoBlock = ({ route }) => {
+  const wps = route.waypoints;
+  return (
     <>
       {/* Stats */}
       <div style={{ marginBottom:16 }}>
         <Label>Stats</Label>
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
           {[
-            { icon:<Navigation size={12}/>, val:route.distance, lbl:'Distance' },
-            { icon:<Clock size={12}/>,      val:route.driveTime, lbl:'Durée' },
+            { icon:<Navigation size={12}/>, val:route.distance,  lbl:'Distance' },
+            { icon:<Clock size={12}/>,      val:route.driveTime, lbl:'Roulage' },
           ].map(({ icon, val, lbl }) => (
             <div key={lbl} style={{ background:C.surface, borderLeft:`2px solid ${route.color}`, borderRadius:8, padding:'10px 12px' }}>
               <div style={{ color:route.color, marginBottom:4 }}>{icon}</div>
@@ -256,30 +315,97 @@ export default function WeekEndPlanner() {
         </div>
       </div>
 
+      {/* Rythme */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Rythme</Label>
+        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:6 }}>
+            <Timer size={12} style={{ color:route.color }} />
+            <span style={{ fontSize:12, color:C.text, fontWeight:600 }}>6 sessions, aucune sous 44 min</span>
+          </div>
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
+            {['44', '52', '46', '57', '60', '61'].map(m => (
+              <span key={m} style={{ fontFamily:C.mono, fontSize:11, color:route.color,
+                background:`${route.color}18`, padding:'2px 7px', borderRadius:5 }}>{m}′</span>
+            ))}
+          </div>
+          <div style={{ fontSize:11, color:'#8899aa', marginTop:8, lineHeight:1.5 }}>
+            Les lieux traversés sont vus depuis la selle : s’y arrêter ferait tomber les sessions sous 40 min.
+          </div>
+        </div>
+      </div>
+
       {/* Pause déjeuner */}
       <div style={{ marginBottom:16 }}>
-        <Label>Pause déjeuner</Label>
+        <Label>Déjeuner · Beau Rivage</Label>
         <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
           {route.lunch.map((l, i) => (
-            <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px', display:'flex', gap:10 }}>
-              {l.photo && (
-                <img src={l.photo} alt={l.name} loading="lazy"
-                  style={{ width:56, height:56, borderRadius:7, objectFit:'cover', flexShrink:0, background:C.faint }}
-                  onError={e => { e.target.style.display='none'; }} />
-              )}
-              <div style={{ minWidth:0, flex:1 }}>
-                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
-                  <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{l.name}</span>
-                  <a href={`https://www.google.com/maps/search/${encodeURIComponent(l.query)}`} target="_blank" rel="noopener noreferrer"
-                    style={{ color:route.color, display:'flex', alignItems:'center', flexShrink:0 }}>
-                    <ExternalLink size={12} />
-                  </a>
-                </div>
-                <div style={{ fontSize:10, color:C.muted, marginTop:2, fontFamily:C.mono }}>{l.town}</div>
-                <div style={{ fontSize:11, color:'#8899aa', marginTop:4 }}>{l.note}</div>
+            <div key={i} style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', gap:8 }}>
+                <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{l.name}</span>
+                <a href={`https://www.google.com/maps/search/${encodeURIComponent(l.query)}`} target="_blank" rel="noopener noreferrer"
+                  style={{ color:route.color, display:'flex', alignItems:'center', flexShrink:0 }}>
+                  <ExternalLink size={12} />
+                </a>
               </div>
+              <div style={{ fontSize:10, color:C.muted, marginTop:2, fontFamily:C.mono }}>{l.town}</div>
+              <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:6, flexWrap:'wrap' }}>
+                <span style={{ fontFamily:C.mono, fontSize:10, color:route.color, background:`${route.color}18`, padding:'2px 7px', borderRadius:5 }}>
+                  {l.hours}
+                </span>
+                <a href={`tel:${l.phone.replace(/\s/g, '')}`}
+                  style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:11, color:'#8899aa', textDecoration:'none' }}>
+                  <Phone size={10} />{l.phone}
+                </a>
+              </div>
+              <div style={{ fontSize:11, color:'#8899aa', marginTop:6, lineHeight:1.5 }}>{l.note}</div>
             </div>
           ))}
+          <div style={{ fontSize:11, color:'#c08a4a', lineHeight:1.5, padding:'0 2px' }}>
+            ⚠ {route.lunchWarning}
+          </div>
+        </div>
+      </div>
+
+      {/* Café de l'après-midi */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Café de l’après-midi</Label>
+        <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
+          <div style={{ fontSize:13, fontWeight:600, color:C.text }}>{route.coffee.name}</div>
+          <div style={{ fontSize:10, color:C.muted, marginTop:2, fontFamily:C.mono }}>{route.coffee.town}</div>
+          <div style={{ display:'flex', alignItems:'center', gap:12, marginTop:6, flexWrap:'wrap' }}>
+            <span style={{ fontFamily:C.mono, fontSize:10, color:route.color, background:`${route.color}18`, padding:'2px 7px', borderRadius:5 }}>
+              {route.coffee.hours}
+            </span>
+            <a href={`tel:${route.coffee.phone.replace(/\s/g, '')}`}
+              style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:11, color:'#8899aa', textDecoration:'none' }}>
+              <Phone size={10} />{route.coffee.phone}
+            </a>
+          </div>
+          <div style={{ fontSize:11, color:'#8899aa', marginTop:6, lineHeight:1.5 }}>{route.coffee.note}</div>
+        </div>
+      </div>
+
+      {/* Essence */}
+      <div style={{ marginBottom:16 }}>
+        <Label>Essence</Label>
+        <div style={{ background:C.surface, borderLeft:'2px solid #f59e0b', borderRadius:9, padding:'12px 14px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:7 }}>
+            <Fuel size={12} style={{ color:'#f59e0b' }} />
+            <span style={{ fontSize:13, fontWeight:600, color:C.text }}>{route.fuel.name}</span>
+          </div>
+          <div style={{ fontSize:10, color:C.muted, marginTop:3, fontFamily:C.mono }}>{route.fuel.town}</div>
+          <div style={{ display:'flex', gap:6, marginTop:6, flexWrap:'wrap' }}>
+            <span style={{ fontFamily:C.mono, fontSize:10, color:'#f59e0b', background:'#f59e0b18', padding:'2px 7px', borderRadius:5 }}>
+              {route.fuel.hours}
+            </span>
+            <span style={{ fontFamily:C.mono, fontSize:10, color:'#f59e0b', background:'#f59e0b18', padding:'2px 7px', borderRadius:5 }}>
+              {route.fuel.at}
+            </span>
+          </div>
+          <div style={{ fontSize:11, color:'#8899aa', marginTop:8, lineHeight:1.5 }}>{route.fuel.why}</div>
+          <div style={{ fontSize:11, color:'#8899aa', marginTop:6, lineHeight:1.5 }}>{route.fuel.backup}</div>
+          <div style={{ fontSize:11, color:'#c08a4a', marginTop:6, lineHeight:1.5 }}>⚠ {route.fuel.warning}</div>
         </div>
       </div>
 
@@ -287,21 +413,20 @@ export default function WeekEndPlanner() {
       <div style={{ marginBottom:16 }}>
         <Label>Points forts</Label>
         {route.highlights.map((h,i) => (
-          <div key={i} style={{ fontSize:12, color:'#8899aa', marginBottom:6 }}>{h}</div>
+          <div key={i} style={{ fontSize:12, color:'#8899aa', marginBottom:6, lineHeight:1.5 }}>{h}</div>
         ))}
       </div>
 
-      {/* Waypoints */}
-      <div style={{ marginBottom:20 }}>
+      {/* Étapes */}
+      <div style={{ marginBottom:16 }}>
         <Label>Étapes</Label>
         {wps.map((wp,i) => {
-          const isHi   = isLunchWp(wp.type);
-          const isEdge = wp.type==='start';
+          const isHi = isLunchWp(wp.type);
           return (
             <div key={i} style={{ display:'flex', gap:10 }}>
               <div style={{ display:'flex', flexDirection:'column', alignItems:'center' }}>
                 <div style={{ width:8, height:8, borderRadius:'50%', marginTop:5, flexShrink:0,
-                  background: isEdge?'#ef4444':isHi?route.color:C.borderHi,
+                  background: dotColor(wp.type, route),
                   boxShadow: isHi?`0 0 8px ${route.color}80`:'none' }} />
                 {i<wps.length-1 && <div style={{ width:1, flex:1, minHeight:14, background:C.border, marginTop:2 }} />}
               </div>
@@ -316,26 +441,48 @@ export default function WeekEndPlanner() {
                     {wp.time}
                   </div>
                 </div>
-                <div style={{ fontFamily:C.mono, fontSize:9, color:C.muted, marginTop:3 }}>{wp.day}</div>
+                <div style={{ fontFamily:C.mono, fontSize:9, color:C.muted, marginTop:3 }}>
+                  {wp.ride ? `${wp.ride} de roulage · ` : ''}{wp.day}
+                </div>
+                {wp.via?.length > 0 && (
+                  <div style={{ fontSize:10, color:C.muted, marginTop:4, fontStyle:'italic', lineHeight:1.5 }}>
+                    en traversée : {wp.via.join(', ')}
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Google Maps CTA */}
-      <a href={route.googleMapsUrl} target="_blank" rel="noopener noreferrer"
+      {/* Routes empruntées */}
+      <div style={{ marginBottom:20 }}>
+        <Label>Routes empruntées</Label>
+        <div style={{ display:'flex', flexWrap:'wrap', gap:5 }}>
+          {route.roads.map(r => (
+            <span key={r.name} style={{ fontFamily:C.mono, fontSize:10, color:'#8899aa',
+              background:C.surface, border:`1px solid ${C.border}`, padding:'3px 8px', borderRadius:5 }}>
+              {r.name} · {r.km}
+            </span>
+          ))}
+        </div>
+        <div style={{ fontSize:11, color:'#8899aa', marginTop:8, lineHeight:1.5 }}>
+          Zéro N12, zéro N164. La D767 se réduit à 400 m de simple traversée.
+        </div>
+      </div>
+
+      {/* CTAs */}
+      <a href={route.gpxUrl} download
         style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8,
           width:'100%', padding:'12px 16px', borderRadius:10, background:route.color, color:C.bg,
           fontFamily:C.sans, fontSize:13, fontWeight:700, cursor:'pointer', textDecoration:'none',
           boxShadow:`0 2px 16px ${route.color}40`, transition:'opacity 0.2s' }}
         onMouseEnter={e=>e.currentTarget.style.opacity='.82'}
         onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
-        <Map size={14} />
-        Voir sur Google Maps
-        <ExternalLink size={12} style={{ opacity:0.7 }} />
+        <Download size={14} />
+        Trace GPX
       </a>
-      <a href={route.gpxUrl} download
+      <a href={route.googleMapsUrl} target="_blank" rel="noopener noreferrer"
         style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8,
           width:'100%', padding:'12px 16px', borderRadius:10, background:'transparent', color:route.color,
           border:`1.5px solid ${route.color}60`,
@@ -343,11 +490,17 @@ export default function WeekEndPlanner() {
           marginTop:8, transition:'background 0.2s' }}
         onMouseEnter={e=>e.currentTarget.style.background=`${route.color}14`}
         onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-        <Download size={14} />
-        Trace GPX
+        <Map size={14} />
+        Aperçu Google Maps
+        <ExternalLink size={12} style={{ opacity:0.7 }} />
       </a>
     </>
   );
+};
+
+/* ─── Main export ────────────────────────────────────────────── */
+export default function WeekEndPlanner() {
+  const route = ROUTE;
 
   return (
     <div style={{ minHeight:'100vh', background:C.bg, fontFamily:C.sans, color:C.text }}>
@@ -376,17 +529,16 @@ export default function WeekEndPlanner() {
           position:'sticky', top:0, height:'100vh', overflowY:'auto',
           padding:'22px 18px',
         }}>
-          {/* Title */}
           <div style={{ marginBottom:22, paddingBottom:18, borderBottom:`1px solid ${C.border}` }}>
             <div style={{ fontFamily:C.display, fontSize:'2.5rem', lineHeight:0.88, color:C.text, letterSpacing:'0.03em' }}>
-              GRANIT<br/>ROSE
+              AR<br/>GOAT
             </div>
-            <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.2em', color:C.muted, marginTop:10 }}>
-              BOUCLE MOTO · AU DÉPART D'HÉNANSAL
+            <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.2em', color:C.muted, marginTop:10, lineHeight:1.8 }}>
+              {route.day.toUpperCase()} · AU DÉPART D’HÉNANSAL
             </div>
           </div>
 
-          <SidebarInfoBlock />
+          <SidebarInfoBlock route={route} />
         </aside>
 
         {/* ── MAIN ──────────────────────────────────────────── */}
@@ -395,26 +547,25 @@ export default function WeekEndPlanner() {
           {/* Mobile header */}
           <div className="mobile-only" style={{ padding:'18px 18px 0' }}>
             <div style={{ fontFamily:C.display, fontSize:'2.2rem', lineHeight:0.9, color:C.text }}>
-              CÔTE DE GRANIT ROSE
+              ARGOAT · LE PAYS DES BOIS
             </div>
             <div style={{ fontFamily:C.mono, fontSize:9, letterSpacing:'0.18em', color:C.muted, marginTop:7 }}>
-              BOUCLE MOTO · AU DÉPART D'HÉNANSAL
+              {route.day.toUpperCase()} · AU DÉPART D’HÉNANSAL
             </div>
           </div>
 
-          {/* ── Route Banner (replaces map) ── */}
           <RouteBanner route={route} />
 
           {/* Mobile info block */}
           <div className="mobile-only" style={{ padding:'16px 18px 0' }}>
-            <SidebarInfoBlock />
+            <SidebarInfoBlock route={route} />
           </div>
 
-          {/* ── Gallery ── */}
           <Gallery route={route} />
 
-          <div style={{ padding:'0 20px 20px', fontSize:9, color:C.faint, fontFamily:C.mono, letterSpacing:'0.12em' }}>
-            TRACÉ INDICATIF · DISTANCES ESTIMÉES
+          <div style={{ padding:'0 20px 20px', fontSize:9, color:C.faint, fontFamily:C.mono, letterSpacing:'0.12em', lineHeight:1.8 }}>
+            TOMTOM MOTORCYCLE · THRILLING · HILLINESS HIGH · WINDINGNESS HIGH · SANS TRAFIC<br />
+            HORAIRES DÉCLARATIFS — À CONFIRMER PAR TÉLÉPHONE
           </div>
         </main>
       </div>
