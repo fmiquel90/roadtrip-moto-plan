@@ -1,15 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
   <metadata><name>Argoat — Guerlédan &amp; gorges du Daoulas</name></metadata>
-  <wpt lat="48.5409784" lon="-2.4330858"><name>Hénansal (départ)</name><type>stop</type></wpt>
-  <wpt lat="48.3506" lon="-2.5498"><name>Mont Bel-Air</name><type>stop</type></wpt>
-  <wpt lat="48.3002" lon="-2.9012"><name>Cascade de Bosméléac</name><type>stop</type></wpt>
-  <wpt lat="48.206" lon="-3.047"><name>Beau Rivage (déjeuner)</name><type>lunch</type></wpt>
-  <wpt lat="48.1996" lon="-3.1268"><name>Les Forges des Salles</name><type>stop</type></wpt>
-  <wpt lat="48.2128" lon="-3.1282"><name>Abbaye de Bon-Repos</name><type>stop</type></wpt>
-  <wpt lat="48.4033" lon="-2.91"><name>Quintin</name><type>stop</type></wpt>
-  <wpt lat="48.5409784" lon="-2.4330858"><name>Hénansal (retour)</name><type>stop</type></wpt>
-  <wpt lat="48.1985" lon="-2.9871"><name>Plein — Intermarché Mûr-de-Bretagne</name><type>fuel</type></wpt>
+  <wpt lat="48.5409784" lon="-2.4330858"><name>Hénansal — départ</name><desc>9h00 · réservoir plein la veille</desc><cmt>9h00 · réservoir plein la veille</cmt><sym>Flag, Green</sym><type>stop</type></wpt>
+  <wpt lat="48.3506" lon="-2.5498"><name>Mont Bel-Air</name><desc>9h43 · arrêt 25 min · panorama 339 m, aucun commerce</desc><cmt>9h43 · arrêt 25 min · panorama 339 m, aucun commerce</cmt><sym>Summit</sym><type>stop</type></wpt>
+  <wpt lat="48.3002" lon="-2.9012"><name>Cascade de Bosméléac</name><desc>11h01 · arrêt 25 min · lac, barrage et aqueduc, aucun commerce</desc><cmt>11h01 · arrêt 25 min · lac, barrage et aqueduc, aucun commerce</cmt><sym>Scenic Area</sym><type>stop</type></wpt>
+  <wpt lat="48.20593" lon="-3.04854"><name>Déjeuner — L'Embarcadère</name><desc>12h11 · 1h15 · Beau Rivage, Caurel · 02 96 28 52 64 · samedi 9h-minuit, service continu</desc><cmt>12h11 · 1h15 · Beau Rivage, Caurel · 02 96 28 52 64 · samedi 9h-minuit, service continu</cmt><sym>Restaurant</sym><type>lunch</type></wpt>
+  <wpt lat="48.1996" lon="-3.1268"><name>Les Forges des Salles</name><desc>14h17 · arrêt 40 min · village-usine du XVIIIe · samedi 14h-18h · 07 83 14 70 63</desc><cmt>14h17 · arrêt 40 min · village-usine du XVIIIe · samedi 14h-18h · 07 83 14 70 63</cmt><sym>Museum</sym><type>stop</type></wpt>
+  <wpt lat="48.2128" lon="-3.1282"><name>Abbaye de Bon-Repos</name><desc>15h07 · arrêt 20 min · ruines · Café de l'Abbaye 10h-19h 7j/7 · visite peut-être fermée le samedi, 02 96 24 82 20</desc><cmt>15h07 · arrêt 20 min · ruines · Café de l'Abbaye 10h-19h 7j/7 · visite peut-être fermée le samedi, 02 96 24 82 20</cmt><sym>Church</sym><type>stop</type></wpt>
+  <wpt lat="48.4033" lon="-2.91"><name>Quintin</name><desc>16h28 · arrêt 40 min · cité de caractère · station U de repli à 545 m</desc><cmt>16h28 · arrêt 40 min · cité de caractère · station U de repli à 545 m</cmt><sym>City (Small)</sym><type>stop</type></wpt>
+  <wpt lat="48.5409784" lon="-2.4330858"><name>Hénansal — retour</name><desc>18h09 · 229 km, 5h23 de roulage</desc><cmt>18h09 · 229 km, 5h23 de roulage</cmt><sym>Flag, Red</sym><type>stop</type></wpt>
+  <wpt lat="48.1985" lon="-2.9871"><name>PLEIN — Intermarché Mûr-de-Bretagne</name><desc>km 114 · samedi 9h-19h, ouvert 7j/7 · 980 m du tracé</desc><cmt>km 114 · samedi 9h-19h, ouvert 7j/7 · 980 m du tracé</cmt><sym>Gas Station</sym><type>fuel</type></wpt>
+  <wpt lat="48.4081" lon="-2.9187"><name>Essence de repli — Système U Quintin</name><desc>km 177 · samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé</desc><cmt>km 177 · samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé</cmt><sym>Gas Station</sym><type>fuel</type></wpt>
+  <wpt lat="48.2163" lon="-3.03703"><name>Resto 2 — Cap'Tain Cook</name><desc>Caurel · samedi 9h-22h · 02 96 67 11 00</desc><cmt>Caurel · samedi 9h-22h · 02 96 67 11 00</cmt><sym>Restaurant</sym><type>food</type></wpt>
+  <wpt lat="48.2118" lon="-3.0499"><name>Resto 3 — Betty Food</name><desc>Caurel · snack · samedi 11h-23h</desc><cmt>Caurel · snack · samedi 11h-23h</cmt><sym>Fast Food</sym><type>food</type></wpt>
   <rte>
     <name>Argoat — Guerlédan &amp; gorges du Daoulas (itinéraire)</name>
     <rtept lat="48.54098" lon="-2.43309"></rtept>

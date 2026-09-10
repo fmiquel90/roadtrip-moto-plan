@@ -261,7 +261,9 @@ const RouteBanner = ({ route }) => {
         </a>
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
-        GPX = NAVIGATION · 8 ÉTAPES + LA STATION, ITINÉRAIRE 120 POINTS, TRACE 1103 POINTS<br />
+        GPX = NAVIGATION · 12 REPÈRES (8 ÉTAPES, 2 STATIONS, 2 RESTOS DE REPLI)<br />
+        HORAIRES ET TÉLÉPHONES DANS LA DESCRIPTION DE CHAQUE POINT<br />
+        ITINÉRAIRE 120 POINTS, TRACE 1103 POINTS<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>
