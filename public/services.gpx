@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata><name>Argoat — services</name></metadata>
-  <wpt lat="48.20593" lon="-3.04854"><name>4 DEJEUNER - L'Embarcadere</name><desc>12h11 · 1h15 · Beau Rivage, Caurel · 02 96 28 52 64 · samedi 9h-minuit, service continu</desc><cmt>12h11 · 1h15 · Beau Rivage, Caurel · 02 96 28 52 64 · samedi 9h-minuit, service continu</cmt><sym>Restaurant</sym><type>lunch</type></wpt>
-  <wpt lat="48.1985" lon="-2.9871"><name>ESSENCE - Intermarche Mur-de-Bretagne</name><desc>km 114 · samedi 9h-19h, ouvert 7j/7 · 980 m du tracé</desc><cmt>km 114 · samedi 9h-19h, ouvert 7j/7 · 980 m du tracé</cmt><sym>Gas Station</sym><type>fuel</type></wpt>
-  <wpt lat="48.4081" lon="-2.9187"><name>ESSENCE secours - Systeme U Quintin</name><desc>km 177 · samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé</desc><cmt>km 177 · samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé</cmt><sym>Gas Station</sym><type>fuel</type></wpt>
-  <wpt lat="48.2163" lon="-3.03703"><name>RESTO 2 - Cap Tain Cook</name><desc>Caurel · samedi 9h-22h · 02 96 67 11 00</desc><cmt>Caurel · samedi 9h-22h · 02 96 67 11 00</cmt><sym>Restaurant</sym><type>food</type></wpt>
-  <wpt lat="48.2118" lon="-3.0499"><name>RESTO 3 - Betty Food (snack)</name><desc>Caurel · snack · samedi 11h-23h</desc><cmt>Caurel · snack · samedi 11h-23h</cmt><sym>Fast Food</sym><type>food</type></wpt>
-</gpx>

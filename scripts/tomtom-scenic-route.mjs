@@ -28,13 +28,13 @@ if (!API_KEY) {
 // `sym` est le nom d'icône Garmin, le jeu que la plupart des appareils
 // reconnaissent ; ceux qui ne le connaissent pas retombent sur l'icône par défaut.
 const STOPS = [
-  { name: '1 DEPART - Henansal',       lat: 48.5409784, lon: -2.4330858, role: 'stop',  sym: 'Flag, Green',
+  { name: '01 DEPART - Henansal',       lat: 48.5409784, lon: -2.4330858, role: 'stop',  sym: 'Flag, Green',
     desc: '9h00 · réservoir plein la veille' },
   { name: 'Moncontour',              lat: 48.3611,    lon: -2.6326,    role: 'shape' },
-  { name: '2 Mont Bel-Air',            lat: 48.3506,    lon: -2.5498,    role: 'stop',  sym: 'Summit',
+  { name: '02 Mont Bel-Air',            lat: 48.3506,    lon: -2.5498,    role: 'stop',  sym: 'Summit',
     desc: '9h43 · arrêt 25 min · panorama 339 m, aucun commerce' },
   { name: 'Le Quillio',              lat: 48.2407,    lon: -2.8825,    role: 'shape' },
-  { name: '3 Cascade de Bosmeleac',    lat: 48.3002,    lon: -2.9012,    role: 'stop',  sym: 'Scenic Area',
+  { name: '03 Cascade de Bosmeleac',    lat: 48.3002,    lon: -2.9012,    role: 'stop',  sym: 'Scenic Area',
     desc: '11h01 · arrêt 25 min · lac, barrage et aqueduc, aucun commerce' },
   // Sans ce crochet, la descente vers le lac ne fait que 34 min et la session
   // d'avant-déjeuner tombe sous les 40 min voulues. Il coûte 5 km pour 10 min.
@@ -42,23 +42,23 @@ const STOPS = [
   { name: 'Gorges du Poulancre',     lat: 48.2539,    lon: -3.0070,    role: 'shape' },
   // Coordonnées du restaurant lui-même, pas du lieu-dit : le GPS doit amener
   // devant la porte.
-  { name: "4 DEJEUNER - L'Embarcadere", lat: 48.20593, lon: -3.04854,    role: 'lunch', sym: 'Restaurant',
+  { name: "04 DEJEUNER - L'Embarcadere", lat: 48.20593, lon: -3.04854,    role: 'lunch', sym: 'Restaurant',
     desc: '12h11 · 1h15 · Beau Rivage, Caurel · 02 96 28 52 64 · samedi 9h-minuit, service continu' },
   { name: 'Écluse de Guerlédan',     lat: 48.1900,    lon: -3.0174,    role: 'shape' },
   { name: 'Anse de Sordan',          lat: 48.2023,    lon: -3.0679,    role: 'shape' },
   // Les Forges des Salles ouvre le samedi 14h-18h, l'abbaye de Bon-Repos non
   // (TomTom lui donne jeu/ven/dim/lun/mar/mer, pas samedi). Le vrai arrêt de
   // l'après-midi est donc ici, et l'abbaye 4 km plus loin n'est qu'un crochet.
-  { name: '5 Forges des Salles',   lat: 48.1996,    lon: -3.1268,    role: 'stop',  sym: 'Museum',
+  { name: '05 Forges des Salles',   lat: 48.1996,    lon: -3.1268,    role: 'stop',  sym: 'Museum',
     desc: '14h17 · arrêt 40 min · village-usine du XVIIIe · samedi 14h-18h · 07 83 14 70 63' },
-  { name: '6 Abbaye de Bon-Repos',     lat: 48.2128,    lon: -3.1282,    role: 'stop',  sym: 'Church',
+  { name: '06 Abbaye de Bon-Repos',     lat: 48.2128,    lon: -3.1282,    role: 'stop',  sym: 'Church',
     desc: "15h07 · arrêt 20 min · ruines · Café de l'Abbaye 10h-19h 7j/7 · visite peut-être fermée le samedi, 02 96 24 82 20" },
   { name: 'Gorges du Daoulas',       lat: 48.2270,    lon: -3.1230,    role: 'shape' },
   { name: 'Saint-Nicolas-du-Pélem',  lat: 48.3154,    lon: -3.1599,    role: 'shape' },
   { name: 'Le Haut-Corlay',          lat: 48.3217,    lon: -3.0564,    role: 'shape' },
-  { name: '7 Quintin',                 lat: 48.4033,    lon: -2.9100,    role: 'stop',  sym: 'City (Small)',
+  { name: '07 Quintin',                 lat: 48.4033,    lon: -2.9100,    role: 'stop',  sym: 'City (Small)',
     desc: '16h28 · arrêt 40 min · cité de caractère · station U de repli à 545 m' },
-  { name: '8 ARRIVEE - Henansal',       lat: 48.5409784, lon: -2.4330858, role: 'stop',  sym: 'Flag, Red',
+  { name: '08 ARRIVEE - Henansal',       lat: 48.5409784, lon: -2.4330858, role: 'stop',  sym: 'Flag, Red',
     desc: '18h09 · 229 km, 5h23 de roulage' },
 ];
 
@@ -70,23 +70,18 @@ const STOPS = [
 // Les solutions de repli sont là pour le jour où le premier choix est fermé
 // ou complet : mieux vaut les avoir dans l'appareil que sur un bout de papier.
 const MARKERS = [
-  { name: 'ESSENCE - Intermarche Mur-de-Bretagne', lat: 48.1985, lon: -2.9871, role: 'fuel', sym: 'Gas Station',
-    desc: 'km 114 · samedi 9h-19h, ouvert 7j/7 · 980 m du tracé' },
-  { name: 'ESSENCE secours - Systeme U Quintin', lat: 48.4081, lon: -2.9187, role: 'fuel', sym: 'Gas Station',
-    desc: 'km 177 · samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé' },
-  { name: "RESTO 2 - Cap Tain Cook",  lat: 48.21630, lon: -3.03703, role: 'food', sym: 'Restaurant',
+  { name: '04 PLEIN - Intermarche Mur-de-Bretagne', lat: 48.1985, lon: -2.9871, role: 'fuel', sym: 'Gas Station',
+    desc: 'samedi 9h-19h, ouvert 7j/7 · 980 m du tracé, crochet de 2 km A/R' },
+  { name: '07 PLEIN secours - Systeme U Quintin', lat: 48.4081, lon: -2.9187, role: 'fuel', sym: 'Gas Station',
+    desc: 'samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé' },
+  { name: "04 option RESTO - Cap Tain Cook",  lat: 48.21630, lon: -3.03703, role: 'food', sym: 'Restaurant',
     desc: 'Caurel · samedi 9h-22h · 02 96 67 11 00' },
-  { name: 'RESTO 3 - Betty Food (snack)',     lat: 48.21180, lon: -3.04990, role: 'food', sym: 'Fast Food',
+  { name: '04 option RESTO - Betty Food snack',     lat: 48.21180, lon: -3.04990, role: 'food', sym: 'Fast Food',
     desc: 'Caurel · snack · samedi 11h-23h' },
 ];
 
 const ROUTE_NAME = 'Argoat — Guerlédan & gorges du Daoulas';
 const GPX_OUTPUT_PATH = new URL('../public/trace.gpx', import.meta.url);
-// Second fichier ne contenant que les services. Les <sym> du GPX sont des noms
-// d'icônes Garmin, que TomTom ignore : dans un fichier unique, tous les points
-// se ressemblent. Chargé séparément, l'appareil traite ce lot comme une
-// catégorie de POI distincte, avec sa propre icône et son propre affichage.
-const SERVICES_OUTPUT_PATH = new URL('../public/services.gpx', import.meta.url);
 
 // 'high' sur les deux : sur ce même tracé, passer de 'normal' à 'high' rallonge
 // nettement la part de voies communales sans coûter de temps.
@@ -304,21 +299,36 @@ function waypointXml(s) {
   return `  <wpt lat="${s.lat}" lon="${s.lon}">${parts.join('')}</wpt>`;
 }
 
-// Fichier ne contenant que des <wpt> : ni trace ni itinéraire, pour être chargé
-// comme une simple couche de POI à côté du parcours.
-function buildWaypointsGpx(name, items) {
-  return `<?xml version="1.0" encoding="UTF-8"?>
-<gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata><name>${esc(name)}</name></metadata>
-${items.map(waypointXml).join('\n')}
-</gpx>
-`;
+// Position d'un point le long du parcours, en km. Sert à trier les repères et à
+// afficher le kilométrage : un GPS qui liste les <wpt> les rend dans l'ordre du
+// fichier, donc ranger le fichier dans l'ordre de la route rend la liste lisible
+// sans aucun réglage sur l'appareil.
+function alongTrack(point, trackPoints, cum) {
+  let best = Infinity, at = 0;
+  for (let i = 0; i < trackPoints.length; i++) {
+    const d = metres({ latitude: point.lat, longitude: point.lon }, trackPoints[i]);
+    if (d < best) { best = d; at = cum[i]; }
+  }
+  return at / 1000;
+}
+
+function orderedWaypoints(trackPoints) {
+  const cum = cumulative(trackPoints);
+  const all = [...STOPS.filter(s => isRealStop(s.role)), ...MARKERS]
+    .map(s => ({ ...s, km: alongTrack(s, trackPoints, cum) }));
+
+  // Le retour tombe au même endroit que le départ : sans ça il remonterait en tête.
+  const last = all.find(s => s.name.startsWith('08 '));
+  if (last) last.km = cum[cum.length - 1] / 1000;
+
+  all.sort((a, b) => a.km - b.km);
+  return all.map(s => ({ ...s, desc: `km ${Math.round(s.km)} · ${s.desc}` }));
 }
 
 function buildGpx({ name, trackPoints, routePoints }) {
-  // Les arrêts réels et les repères hors tracé : les points de forme n'ont rien
-  // à faire dans le roadbook.
-  const wpts = [...STOPS.filter(s => isRealStop(s.role)), ...MARKERS].map(waypointXml).join('\n');
+  // Les arrêts réels et les repères hors tracé, rangés dans l'ordre de passage :
+  // les points de forme n'ont rien à faire dans le roadbook.
+  const wpts = orderedWaypoints(trackPoints).map(waypointXml).join('\n');
 
   // <rte> : itinéraire léger, c'est ce qu'un TomTom sait recalculer.
   const rtepts = routePoints.map(p =>
@@ -374,13 +384,6 @@ async function main() {
   const realStops = STOPS.filter(s => isRealStop(s.role));
   const mapsUrl = `https://www.google.com/maps/dir/${realStops.map(s => `${s.lat},${s.lon}`).join('/')}`;
   console.log(`\nGoogle Maps (aperçu, ${realStops.length} étapes) : ${mapsUrl}`);
-
-  const services = [
-    ...MARKERS,
-    ...STOPS.filter(s => s.role === 'lunch'),
-  ].sort((a, b) => a.name.localeCompare(b.name));
-  writeFileSync(SERVICES_OUTPUT_PATH, buildWaypointsGpx('Argoat — services', services));
-  console.log(`\nServices écrits : ${SERVICES_OUTPUT_PATH.pathname} (${services.length} points, sans trace ni itinéraire)`);
 
   writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints }));
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
