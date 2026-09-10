@@ -65,6 +65,12 @@ const GPX_OUTPUT_PATH = new URL('../public/trace.gpx', import.meta.url);
 const HILLINESS = 'high';
 const WINDINGNESS = 'high';
 
+// Date et heure réelles du départ. Sans ce paramètre, TomTom calcule pour
+// l'instant présent : la même requête rendait 4h59 en fin de matinée et 5h29
+// plus tôt dans la journée, parce que le modèle de vitesses dépend de l'heure.
+// À mettre à jour si la sortie change de date.
+const DEPART_AT = '2026-09-12T09:00:00+02:00';   // samedi 9h00
+
 // Tolérance de simplification de la trace, en mètres. La trace brute fait plusieurs
 // milliers de points ; un GPS moto n'en a pas besoin d'autant pour suivre la route.
 const TRACK_TOLERANCE_M = 12;
@@ -91,9 +97,15 @@ async function calculateRoute() {
   const url = `https://api.tomtom.com/routing/1/calculateRoute/${locations}/json` +
     `?key=${API_KEY}&travelMode=motorcycle&routeType=thrilling` +
     `&hilliness=${HILLINESS}&windingness=${WINDINGNESS}` +
-    // traffic=false : sans ça les durées intègrent le trafic à l'instant du calcul et
-    // le chiffre publié sur le site dérive d'un run à l'autre.
-    `&traffic=false&instructionsType=text&language=fr-FR`;
+    // traffic=false pour ignorer le trafic live, departAt pour que le modèle de
+    // vitesses soit celui du samedi matin et non celui de l'heure du calcul.
+    `&traffic=false&departAt=${encodeURIComponent(DEPART_AT)}` +
+    // alreadyUsedRoads : la boucle repassait sur 10 % de son propre tracé —
+    // 13 km entre Hénansal et Lamballe et 16 km autour du Mont Bel-Air, à l'aller
+    // comme au retour. Sur ces portions le GPS ne peut pas deviner quel passage
+    // est visé et coupe la boucle. Cette option ramène le recouvrement à 0,8 %.
+    `&avoid=alreadyUsedRoads` +
+    `&instructionsType=text&language=fr-FR`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Routing failed: ${res.status} ${await res.text()}`);

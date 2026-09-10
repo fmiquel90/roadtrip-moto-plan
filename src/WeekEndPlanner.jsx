@@ -27,32 +27,34 @@ const WI = 'https://upload.wikimedia.org/wikipedia/commons/thumb';
  * Le rythme est la contrainte structurante : minimum 40-45 min de roulage entre
  * deux arrêts. D'où le petit nombre d'arrêts et les nombreuses traversées — les
  * lieux listés en `via` sont vus depuis la selle, on ne s'y arrête pas.
- * Distance et durée viennent de scripts/tomtom-scenic-route.mjs (traffic=false).
+ * Distance et durée viennent de scripts/tomtom-scenic-route.mjs, calculées pour
+ * un départ le samedi à 9h00 : sans departAt, TomTom estime pour l'heure du
+ * calcul et le chiffre dérive dans la journée.
  */
 const ROUTE = {
   title: 'Argoat',
   subtitle: 'Mont Bel-Air, Guerlédan, gorges du Poulancre & du Daoulas',
   color: '#34d399', colorDark: '#10b981',
-  distance: '227 km', driveTime: '5h29', dayLength: '9h14',
+  distance: '229 km', driveTime: '5h23', dayLength: '9h08',
   day: 'Samedi',
   googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.1996,-3.1268/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
   gpxUrl: '/trace.gpx',
   waypoints: [
     { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
-    { name: 'Mont Bel-Air', type: 'stop', time: '9h44', ride: '44 min', pause: '25 min',
+    { name: 'Mont Bel-Air', type: 'stop', time: '9h43', ride: '43 min', pause: '25 min',
       day: 'Panorama, 339 m', via: ['Moncontour'] },
-    { name: 'Cascade de Bosméléac', type: 'stop', time: '11h02', ride: '53 min', pause: '25 min',
+    { name: 'Cascade de Bosméléac', type: 'stop', time: '11h01', ride: '53 min', pause: '25 min',
       day: 'Lac, barrage & aqueduc', via: ['Le Quillio'] },
-    { name: 'Beau Rivage', type: 'lunch', time: '12h14', ride: '47 min', pause: '1h15',
+    { name: 'Beau Rivage', type: 'lunch', time: '12h11', ride: '45 min', pause: '1h15',
       day: 'Déjeuner au bord du lac', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
-    { name: 'Les Forges des Salles', type: 'stop', time: '14h18', ride: '49 min', pause: '40 min',
+    { name: 'Les Forges des Salles', type: 'stop', time: '14h17', ride: '51 min', pause: '40 min',
       day: 'Village-usine du XVIIIᵉ · samedi 14h-18h',
       via: ['Plein à Mûr-de-Bretagne (km 114)', 'Écluse de Guerlédan', 'Anse de Sordan'] },
-    { name: 'Abbaye de Bon-Repos', type: 'stop', time: '15h08', ride: '10 min', pause: '20 min',
+    { name: 'Abbaye de Bon-Repos', type: 'stop', time: '15h07', ride: '10 min', pause: '20 min',
       day: 'Ruines & Café de l’Abbaye, 4 km plus loin' },
-    { name: 'Quintin', type: 'stop', time: '16h30', ride: '62 min', pause: '40 min',
+    { name: 'Quintin', type: 'stop', time: '16h28', ride: '61 min', pause: '40 min',
       day: 'Cité de caractère · station de repli', via: ['Gorges du Daoulas', 'Saint-Nicolas-du-Pélem', 'Le Haut-Corlay'] },
-    { name: 'Hénansal', type: 'end', time: '18h14', ride: '64 min', day: 'Retour' },
+    { name: 'Hénansal', type: 'end', time: '18h09', ride: '61 min', day: 'Retour' },
   ],
   highlights: [
     '⛰️ Mont Bel-Air, 339 m — le toit de l’est du département',
@@ -64,12 +66,12 @@ const ROUTE = {
   ],
   abbeyWarning: "L'abbaye de Bon-Repos est donnée ouverte 14h-18h du dimanche au vendredi — le samedi manque. Vérifie au 02 96 24 82 20 : si elle ouvre, reprends 20 min sur les Forges.",
   roads: [
-    { name: 'Voies communales', km: '55,9 km' },
-    { name: 'D768', km: '30,2 km' },
-    { name: 'D28', km: '29,4 km' },
-    { name: 'D35', km: '24,5 km' },
-    { name: 'D15b', km: '8,8 km' },
-    { name: 'D44 (gorges du Daoulas)', km: '6,9 km' },
+    { name: 'Voies communales', km: '81,3 km' },
+    { name: 'D28', km: '28,7 km' },
+    { name: 'D768', km: '22,1 km' },
+    { name: 'D35', km: '18,4 km' },
+    { name: 'D14', km: '8,9 km' },
+    { name: 'D44 (gorges du Daoulas)', km: '5,8 km' },
   ],
   lunch: [
     { name: "L'Embarcadère", town: 'Beau Rivage, 22530 Caurel',
@@ -87,10 +89,10 @@ const ROUTE = {
   ],
   lunchWarning: "À éviter : l'Auberge de Guerlédan ne sert que de 12h à 13h. Il y a aussi La Dame du Lac à 90 m du point de déjeuner, en bord d'eau — mais la base la classe en bar et ne donne aucun horaire, à tenter au 06 63 43 24 24. Horaires déclaratifs — appelle pour réserver.",
   coffee: { name: "Café de l'Abbaye", town: 'Bon-Repos-sur-Blavet', phone: '02 96 24 91 06',
-    hours: '10h — 19h en continu, 7j/7', note: 'À 179 m de l’abbaye : le café de 14h39.' },
+    hours: '10h — 19h en continu, 7j/7', note: 'À 179 m de l’abbaye : le café de 15h07.' },
   fuel: {
     name: 'Intermarché', town: '5 Rue de Pontivy, 22530 Guerlédan (Mûr-de-Bretagne)',
-    hours: 'Samedi 9h — 19h, 7j/7', at: 'km 114 (51 %) · 980 m du tracé',
+    hours: 'Samedi 9h — 19h, 7j/7', at: 'km 114 (50 %) · 980 m du tracé',
     why: "6 km après le déjeuner, en tout début de session : tu sors de table, tu fais le plein, il te reste 111 km. Le crochet coûte 2 km aller-retour.",
     backup: "Repli : Système U de Quintin (km 177, samedi 9h-22h, 545 m du tracé) — tu y es arrêté 40 min de toute façon.",
     warning: "Deux stations idéalement placées mais inutilisables ce jour-là : la TotalEnergies de Bon-Repos (22 m du tracé, mais samedi 9h-12h et on y passe vers 15h) et le Carrefour de Corlay (212 m du tracé, fermé le samedi).",
@@ -259,7 +261,7 @@ const RouteBanner = ({ route }) => {
         </a>
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
-        GPX = NAVIGATION · 8 ÉTAPES + LA STATION, ITINÉRAIRE 120 POINTS, TRACE 1071 POINTS<br />
+        GPX = NAVIGATION · 8 ÉTAPES + LA STATION, ITINÉRAIRE 120 POINTS, TRACE 1103 POINTS<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>
@@ -326,10 +328,10 @@ const SidebarInfoBlock = ({ route }) => {
         <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:9, padding:'12px 14px' }}>
           <div style={{ display:'flex', alignItems:'center', gap:7, marginBottom:6 }}>
             <Timer size={12} style={{ color:route.color }} />
-            <span style={{ fontSize:12, color:C.text, fontWeight:600 }}>6 sessions, aucune sous 44 min</span>
+            <span style={{ fontSize:12, color:C.text, fontWeight:600 }}>6 sessions, aucune sous 43 min</span>
           </div>
           <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-            {['44', '53', '47', '49', '62', '64'].map(m => (
+            {['43', '53', '45', '51', '61', '61'].map(m => (
               <span key={m} style={{ fontFamily:C.mono, fontSize:11, color:route.color,
                 background:`${route.color}18`, padding:'2px 7px', borderRadius:5 }}>{m}′</span>
             ))}
@@ -476,7 +478,7 @@ const SidebarInfoBlock = ({ route }) => {
           ))}
         </div>
         <div style={{ fontSize:11, color:'#8899aa', marginTop:8, lineHeight:1.5 }}>
-          Zéro N12, zéro N164. La D767 se réduit à 400 m de simple traversée.
+          Aucune voie rapide, pas même les 400 m de D767 qui subsistaient : l'anti-recouvrement les a fait disparaître.
         </div>
       </div>
 
@@ -574,7 +576,7 @@ export default function WeekEndPlanner() {
 
           <div style={{ padding:'0 20px 20px', fontSize:9, color:C.faint, fontFamily:C.mono, letterSpacing:'0.12em', lineHeight:1.8 }}>
             TOMTOM MOTORCYCLE · THRILLING · HILLINESS HIGH · WINDINGNESS HIGH · SANS TRAFIC<br />
-            DURÉES VARIABLES DE ±3 % D’UN CALCUL À L’AUTRE — À PRENDRE À ±10 MIN<br />
+            DURÉES CALCULÉES POUR UN DÉPART LE SAMEDI À 9H00 (departAt)<br />
             HORAIRES DÉCLARATIFS — À CONFIRMER PAR TÉLÉPHONE
           </div>
         </main>
