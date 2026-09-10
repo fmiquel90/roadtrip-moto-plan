@@ -36,7 +36,10 @@ const STOPS = [
   { name: 'Beau Rivage (déjeuner)',  lat: 48.2060,    lon: -3.0470,    role: 'lunch' },
   { name: 'Écluse de Guerlédan',     lat: 48.1900,    lon: -3.0174,    role: 'shape' },
   { name: 'Anse de Sordan',          lat: 48.2023,    lon: -3.0679,    role: 'shape' },
-  { name: 'Les Forges des Salles',   lat: 48.1996,    lon: -3.1268,    role: 'shape' },
+  // Les Forges des Salles ouvre le samedi 14h-18h, l'abbaye de Bon-Repos non
+  // (TomTom lui donne jeu/ven/dim/lun/mar/mer, pas samedi). Le vrai arrêt de
+  // l'après-midi est donc ici, et l'abbaye 4 km plus loin n'est qu'un crochet.
+  { name: 'Les Forges des Salles',   lat: 48.1996,    lon: -3.1268,    role: 'stop'  },
   { name: 'Abbaye de Bon-Repos',     lat: 48.2128,    lon: -3.1282,    role: 'stop'  },
   { name: 'Gorges du Daoulas',       lat: 48.2270,    lon: -3.1230,    role: 'shape' },
   { name: 'Saint-Nicolas-du-Pélem',  lat: 48.3154,    lon: -3.1599,    role: 'shape' },

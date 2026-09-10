@@ -33,31 +33,35 @@ const ROUTE = {
   title: 'Argoat',
   subtitle: 'Mont Bel-Air, Guerlédan, gorges du Poulancre & du Daoulas',
   color: '#34d399', colorDark: '#10b981',
-  distance: '227 km', driveTime: '5h20', dayLength: '9h20',
+  distance: '227 km', driveTime: '5h29', dayLength: '9h14',
   day: 'Samedi',
-  googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
+  googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.1996,-3.1268/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
   gpxUrl: '/trace.gpx',
   waypoints: [
     { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
     { name: 'Mont Bel-Air', type: 'stop', time: '9h44', ride: '44 min', pause: '25 min',
       day: 'Panorama, 339 m', via: ['Moncontour'] },
-    { name: 'Cascade de Bosméléac', type: 'stop', time: '11h01', ride: '52 min', pause: '25 min',
+    { name: 'Cascade de Bosméléac', type: 'stop', time: '11h02', ride: '53 min', pause: '25 min',
       day: 'Lac, barrage & aqueduc', via: ['Le Quillio'] },
-    { name: 'Beau Rivage', type: 'lunch', time: '12h12', ride: '46 min', pause: '1h30',
+    { name: 'Beau Rivage', type: 'lunch', time: '12h14', ride: '47 min', pause: '1h15',
       day: 'Déjeuner au bord du lac', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
-    { name: 'Abbaye de Bon-Repos', type: 'stop', time: '14h39', ride: '57 min', pause: '1h00',
-      day: 'Abbaye + gorges du Daoulas', via: ['Écluse de Guerlédan', 'Anse de Sordan', 'Les Forges des Salles'] },
-    { name: 'Quintin', type: 'fuel', time: '16h39', ride: '60 min', pause: '40 min',
+    { name: 'Les Forges des Salles', type: 'stop', time: '14h18', ride: '49 min', pause: '40 min',
+      day: 'Village-usine du XVIIIᵉ · samedi 14h-18h', via: ['Écluse de Guerlédan', 'Anse de Sordan'] },
+    { name: 'Abbaye de Bon-Repos', type: 'stop', time: '15h08', ride: '10 min', pause: '20 min',
+      day: 'Ruines & Café de l’Abbaye, 4 km plus loin' },
+    { name: 'Quintin', type: 'fuel', time: '16h30', ride: '62 min', pause: '40 min',
       day: 'Plein + cité de caractère', via: ['Gorges du Daoulas', 'Saint-Nicolas-du-Pélem', 'Le Haut-Corlay'] },
-    { name: 'Hénansal', type: 'end', time: '18h20', ride: '61 min', day: 'Retour' },
+    { name: 'Hénansal', type: 'end', time: '18h14', ride: '64 min', day: 'Retour' },
   ],
   highlights: [
     '⛰️ Mont Bel-Air, 339 m — le toit de l’est du département',
     '💧 Cascade et barrage de Bosméléac, sur l’aqueduc',
     '🌊 Tour complet du lac de Guerlédan, rives nord et sud',
+    '🔨 Les Forges des Salles, village-usine du XVIIIᵉ conservé en l’état',
     '🏛️ Abbaye de Bon-Repos, ruines cisterciennes sur le Blavet',
     '🪨 Gorges du Daoulas — barres de schiste dressées, 7 km de D44',
   ],
+  abbeyWarning: "L'abbaye de Bon-Repos est donnée ouverte 14h-18h du dimanche au vendredi — le samedi manque. Vérifie au 02 96 24 82 20 : si elle ouvre, reprends 20 min sur les Forges.",
   roads: [
     { name: 'Voies communales', km: '55,9 km' },
     { name: 'D768', km: '30,2 km' },
@@ -324,13 +328,14 @@ const SidebarInfoBlock = ({ route }) => {
             <span style={{ fontSize:12, color:C.text, fontWeight:600 }}>6 sessions, aucune sous 44 min</span>
           </div>
           <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
-            {['44', '52', '46', '57', '60', '61'].map(m => (
+            {['44', '53', '47', '49', '62', '64'].map(m => (
               <span key={m} style={{ fontFamily:C.mono, fontSize:11, color:route.color,
                 background:`${route.color}18`, padding:'2px 7px', borderRadius:5 }}>{m}′</span>
             ))}
           </div>
           <div style={{ fontSize:11, color:'#8899aa', marginTop:8, lineHeight:1.5 }}>
             Les lieux traversés sont vus depuis la selle : s’y arrêter ferait tomber les sessions sous 40 min.
+            Les 4 km entre les Forges des Salles et Bon-Repos sont un déplacement interne à l’arrêt, pas une session.
           </div>
         </div>
       </div>
@@ -383,6 +388,7 @@ const SidebarInfoBlock = ({ route }) => {
             </a>
           </div>
           <div style={{ fontSize:11, color:'#8899aa', marginTop:6, lineHeight:1.5 }}>{route.coffee.note}</div>
+          <div style={{ fontSize:11, color:'#c08a4a', marginTop:8, lineHeight:1.5 }}>⚠ {route.abbeyWarning}</div>
         </div>
       </div>
 
@@ -565,6 +571,7 @@ export default function WeekEndPlanner() {
 
           <div style={{ padding:'0 20px 20px', fontSize:9, color:C.faint, fontFamily:C.mono, letterSpacing:'0.12em', lineHeight:1.8 }}>
             TOMTOM MOTORCYCLE · THRILLING · HILLINESS HIGH · WINDINGNESS HIGH · SANS TRAFIC<br />
+            DURÉES VARIABLES DE ±3 % D’UN CALCUL À L’AUTRE — À PRENDRE À ±10 MIN<br />
             HORAIRES DÉCLARATIFS — À CONFIRMER PAR TÉLÉPHONE
           </div>
         </main>
