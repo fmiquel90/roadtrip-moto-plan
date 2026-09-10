@@ -288,7 +288,7 @@ const RouteBanner = ({ route }) => {
         <a
           href={route.itnUrl}
           download
-          title="Format TomTom : mêmes arrêts, mais annoncés comme étapes"
+          title="À copier sur l'appareil par câble USB — plan.tomtom.com n'importe pas ce format"
           style={{
             display:'inline-flex', alignItems:'center', gap:10,
             padding:'13px 22px', borderRadius:12,
@@ -302,14 +302,15 @@ const RouteBanner = ({ route }) => {
           onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
         >
           <Download size={16} />
-          Itinéraire TomTom (.itn)
+          TomTom .itn (par USB)
         </a>
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
         GPX = NAVIGATION · 12 REPÈRES NUMÉROTÉS DANS L’ORDRE DE LA ROUTE<br />
         DÉJEUNER, PLEIN ET OPTIONS NOMMÉS EN CLAIR · KM, HORAIRES ET TÉLÉPHONES EN DESCRIPTION<br />
         TRACE DE 1103 POINTS, SANS ÉTAPES NUMÉROTÉES PARASITES<br />
-        .ITN = FORMAT TOMTOM · 9 ARRÊTS ANNONCÉS + 91 POINTS DE PASSAGE MUETS<br />
+        .ITN = 9 ARRÊTS ANNONCÉS + 91 POINTS MUETS · À COPIER SUR L’APPAREIL PAR USB<br />
+        PLAN.TOMTOM.COM N’IMPORTE QUE DU GPX ET IGNORE LES POINTS NOMMÉS<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>
