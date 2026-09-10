@@ -39,6 +39,7 @@ const ROUTE = {
   day: 'Samedi',
   googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.1996,-3.1268/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
   gpxUrl: '/trace.gpx',
+  itnUrl: '/trace.itn',
   waypoints: [
     { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
     { name: 'Mont Bel-Air', type: 'stop', time: '9h43', ride: '43 min', pause: '25 min',
@@ -284,11 +285,31 @@ const RouteBanner = ({ route }) => {
           Aperçu Google Maps
           <ExternalLink size={13} style={{ opacity:0.7 }} />
         </a>
+        <a
+          href={route.itnUrl}
+          download
+          title="Format TomTom : mêmes arrêts, mais annoncés comme étapes"
+          style={{
+            display:'inline-flex', alignItems:'center', gap:10,
+            padding:'13px 22px', borderRadius:12,
+            background:'transparent', color:route.color,
+            border:`1.5px solid ${route.color}60`,
+            fontFamily:C.sans, fontSize:14, fontWeight:700,
+            cursor:'pointer', textDecoration:'none',
+            transition:'all 0.2s',
+          }}
+          onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
+          onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
+        >
+          <Download size={16} />
+          Itinéraire TomTom (.itn)
+        </a>
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
         GPX = NAVIGATION · 12 REPÈRES NUMÉROTÉS DANS L’ORDRE DE LA ROUTE<br />
         DÉJEUNER, PLEIN ET OPTIONS NOMMÉS EN CLAIR · KM, HORAIRES ET TÉLÉPHONES EN DESCRIPTION<br />
         TRACE DE 1103 POINTS, SANS ÉTAPES NUMÉROTÉES PARASITES<br />
+        .ITN = FORMAT TOMTOM · 9 ARRÊTS ANNONCÉS + 91 POINTS DE PASSAGE MUETS<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>

@@ -72,7 +72,7 @@ const STOPS = [
 const MARKERS = [
   { name: '04 PLEIN - Intermarche Mur-de-Bretagne', lat: 48.1985, lon: -2.9871, role: 'fuel', sym: 'Gas Station',
     desc: 'samedi 9h-19h, ouvert 7j/7 · 980 m du tracé, crochet de 2 km A/R' },
-  { name: '07 PLEIN secours - Systeme U Quintin', lat: 48.4081, lon: -2.9187, role: 'fuel', sym: 'Gas Station',
+  { name: '07 PLEIN secours - Systeme U Quintin', lat: 48.4081, lon: -2.9187, role: 'fuel', backup: true, sym: 'Gas Station',
     desc: 'samedi 9h-22h · à éviter : Bon-Repos ferme à 12h le samedi, Corlay est fermé' },
   { name: "04 option RESTO - Cap Tain Cook",  lat: 48.21630, lon: -3.03703, role: 'food', sym: 'Restaurant',
     desc: 'Caurel · samedi 9h-22h · 02 96 67 11 00' },
@@ -82,6 +82,20 @@ const MARKERS = [
 
 const ROUTE_NAME = 'Argoat — Guerlédan & gorges du Daoulas';
 const GPX_OUTPUT_PATH = new URL('../public/trace.gpx', import.meta.url);
+const ITN_OUTPUT_PATH = new URL('../public/trace.itn', import.meta.url);
+
+// Le .itn est le format d'itinéraire propre à TomTom. Son intérêt ici : il
+// distingue les points de PASSAGE des points d'ARRÊT, ce que le GPX ne sait pas
+// faire. On peut donc y mettre les points de forme qui tiennent le tracé sans
+// qu'ils polluent la liste des étapes, et n'annoncer que les vrais arrêts.
+//
+// Une ligne par point : longitude|latitude|libellé|indicateur|
+// Les coordonnées sont des entiers, en degrés multipliés par 100000.
+const ITN_FLAG = { departure: 0, stop: 1, via: 2, destination: 3 };
+
+// Plafond du .itn. Les TomTom anciens s'arrêtaient à 48 points ; les récents
+// acceptent nettement plus. À baisser si l'appareil refuse le fichier.
+const ITN_MAX_POINTS = 100;
 
 // 'high' sur les deux : sur ce même tracé, passer de 'normal' à 'high' rallonge
 // nettement la part de voies communales sans coûter de temps.
@@ -366,6 +380,50 @@ function labelRoutePoints(labels, shaping) {
   return byIndex;
 }
 
+function buildItn({ routePoints, labels, shaping }) {
+  // Le .itn est l'itinéraire qu'on roule : les solutions de repli n'y ont pas
+  // leur place. En faire des arrêts enverrait le GPS faire un détour vers
+  // chacune d'elles. Elles restent en <wpt> dans le GPX.
+  const planned = labels.filter(s => s.role !== 'food' && !s.backup);
+  const labelled = labelRoutePoints(planned, shaping);
+  const arrival = planned[planned.length - 1];
+
+  // Un point par point de forme, remplacé par l'arrêt lui-même là où il y en a
+  // un : ainsi le .itn tient le tracé ET s'arrête aux bons endroits.
+  let points = routePoints.map((p, i) => {
+    const item = labelled.get(i);
+    if (!item) return { lat: p.latitude, lon: p.longitude, name: '', flag: ITN_FLAG.via };
+    return { lat: item.lat, lon: item.lon, name: item.name, flag: ITN_FLAG.stop };
+  });
+
+  // Départ et arrivée sont les deux extrémités, nommées : sans ça l'arrivée
+  // apparaissait deux fois, une fois nommée et une fois vide.
+  points = points.filter((p, i) => !(p.name === arrival.name && i !== points.length - 1));
+  points[0] = { lat: labels[0].lat, lon: labels[0].lon, name: labels[0].name, flag: ITN_FLAG.departure };
+  points[points.length - 1] = { lat: arrival.lat, lon: arrival.lon, name: arrival.name, flag: ITN_FLAG.destination };
+
+  // Écrêtage : on ne retire que des points de passage, jamais un arrêt, en
+  // commençant par les plus redondants — même règle que pour les <rtept>.
+  while (points.length > ITN_MAX_POINTS) {
+    let victim = -1, smallest = Infinity;
+    for (let i = 1; i < points.length - 1; i++) {
+      if (points[i].flag !== ITN_FLAG.via) continue;
+      const gap = metres(
+        { latitude: points[i - 1].lat, longitude: points[i - 1].lon },
+        { latitude: points[i + 1].lat, longitude: points[i + 1].lon });
+      if (gap < smallest) { smallest = gap; victim = i; }
+    }
+    if (victim === -1) break;   // plus que des arrêts
+    points.splice(victim, 1);
+  }
+
+  const coord = v => Math.round(v * 100000);
+  // Le séparateur du format est la barre verticale : elle ne doit pas figurer
+  // dans un libellé.
+  const label = s => s.replace(/\|/g, '-');
+  return points.map(p => `${coord(p.lon)}|${coord(p.lat)}|${label(p.name)}|${p.flag}|`).join('\n') + '\n';
+}
+
 function buildGpx({ name, trackPoints, routePoints, labels, shaping }) {
   // Les arrêts réels et les repères hors tracé, rangés dans l'ordre de passage :
   // les points de forme n'ont rien à faire dans le roadbook.
@@ -442,6 +500,14 @@ async function main() {
   console.log(`\nGoogle Maps (aperçu, ${realStops.length} étapes) : ${mapsUrl}`);
 
   const labels = orderedWaypoints(trackPoints);
+
+  const itn = buildItn({ routePoints, labels, shaping });
+  writeFileSync(ITN_OUTPUT_PATH, itn);
+  const itnLines = itn.trim().split('\n');
+  const itnStops = itnLines.filter(l => !l.endsWith('|2|')).length;
+  console.log(`\nITN écrit : ${ITN_OUTPUT_PATH.pathname}`);
+  console.log(`  ${itnLines.length} points dont ${itnStops} arrêts annoncés, le reste en points de passage`);
+
   writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints, labels, shaping }));
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
   console.log(`  ${allPoints.length} points bruts -> ${trackPoints.length} points de trace (tolérance ${TRACK_TOLERANCE_M} m)`);
