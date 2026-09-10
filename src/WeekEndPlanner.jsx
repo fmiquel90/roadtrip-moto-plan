@@ -169,8 +169,11 @@ const RouteBanner = ({ route }) => {
         </div>
       </div>
 
-      {/* Visual waypoints strip — la durée de roulage figure sur le lien, pas sur le point */}
-      <div style={{ overflowX:'auto', paddingBottom:4 }}>
+      {/* Visual waypoints strip — la durée de roulage figure sur le lien, pas sur le point.
+          paddingTop : overflowX:auto force le navigateur à rogner aussi verticalement,
+          et le badge « plein » posé sur le connecteur dépasse de ~4 px au-dessus de la
+          ligne des points. La marge haute lui laisse la place au lieu de le couper. */}
+      <div style={{ overflowX:'auto', paddingTop:8, paddingBottom:4 }}>
         <div style={{ display:'flex', alignItems:'flex-start', minWidth:'max-content', gap:0 }}>
           {wps.map((wp, i) => {
             const isHi   = isLunchWp(wp.type);
