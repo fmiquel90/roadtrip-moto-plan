@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ExternalLink, Camera, Navigation, Clock, Map, Download, Fuel, Phone, Timer } from 'lucide-react';
+import { MapPin, ExternalLink, Camera, Navigation, Clock, Map, Download, Fuel, Phone, Timer, Utensils } from 'lucide-react';
 
 /* ─── Design tokens ─────────────────────────────────────────── */
 const C = {
@@ -45,11 +45,14 @@ const ROUTE = {
       day: 'Panorama, 339 m', via: ['Moncontour'] },
     { name: 'Cascade de Bosméléac', type: 'stop', time: '11h01', ride: '53 min', pause: '25 min',
       day: 'Lac, barrage & aqueduc', via: ['Le Quillio'] },
-    { name: 'Beau Rivage', type: 'lunch', time: '12h11', ride: '45 min', pause: '1h15',
-      day: 'Déjeuner au bord du lac', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
+    { name: "L'Embarcadère", type: 'lunch', time: '12h11', ride: '45 min', pause: '1h15',
+      day: 'Déjeuner · Beau Rivage, Caurel', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
     { name: 'Les Forges des Salles', type: 'stop', time: '14h17', ride: '51 min', pause: '40 min',
       day: 'Village-usine du XVIIIᵉ · samedi 14h-18h',
-      via: ['Plein à Mûr-de-Bretagne (km 114)', 'Écluse de Guerlédan', 'Anse de Sordan'] },
+      // Arrêt technique 6 km après le déjeuner : pas une étape du rythme, mais il
+      // doit se voir sur la frise, sinon on croit qu'il n'y a pas de plein prévu.
+      fuelBefore: { name: 'Intermarché Mûr-de-Bretagne', at: 'km 114', hours: 'sam 9h-19h' },
+      via: ['Écluse de Guerlédan', 'Anse de Sordan'] },
     { name: 'Abbaye de Bon-Repos', type: 'stop', time: '15h07', ride: '10 min', pause: '20 min',
       day: 'Ruines & Café de l’Abbaye, 4 km plus loin' },
     { name: 'Quintin', type: 'stop', time: '16h28', ride: '61 min', pause: '40 min',
@@ -191,8 +194,10 @@ const RouteBanner = ({ route }) => {
                     }}>
                       {wp.time}
                     </div>
-                    <div style={{ fontSize:11, color:isHi?route.color:isEdgeWp(wp.type)?'#ef4444':C.text,
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:4,
+                      fontSize:11, color:isHi?route.color:isEdgeWp(wp.type)?'#ef4444':C.text,
                       fontWeight: isHi?600:400, whiteSpace:'nowrap', lineHeight:1.2, marginTop:5 }}>
+                      {isHi && <Utensils size={11} />}
                       {wp.name}
                     </div>
                     {wp.pause && (
@@ -203,14 +208,31 @@ const RouteBanner = ({ route }) => {
                   </div>
                 </div>
                 {!isLast && (
-                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginTop:-2, minWidth:74 }}>
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', marginTop:-2,
+                    minWidth: next.fuelBefore ? 108 : 74 }}>
                     <div style={{ display:'flex', alignItems:'center', height:12 }}>
-                      <div style={{ height:1.5, width:52, background:`linear-gradient(to right, ${dotCol}60, ${C.borderHi}60)` }} />
+                      <div style={{ height:1.5, width: next.fuelBefore ? 30 : 52,
+                        background:`linear-gradient(to right, ${dotCol}60, ${C.borderHi}60)` }} />
+                      {next.fuelBefore && (
+                        <div title={`${next.fuelBefore.name} · ${next.fuelBefore.at} · ${next.fuelBefore.hours}`}
+                          style={{ display:'flex', alignItems:'center', gap:3, margin:'0 4px', padding:'2px 6px',
+                            borderRadius:5, background:'#f59e0b1f', border:'1px solid #f59e0b55', color:'#f59e0b',
+                            fontFamily:C.mono, fontSize:9, whiteSpace:'nowrap' }}>
+                          <Fuel size={9} />plein
+                        </div>
+                      )}
+                      <div style={{ height:1.5, width: next.fuelBefore ? 30 : 0,
+                        background:`linear-gradient(to right, ${C.borderHi}60, ${C.borderHi}60)` }} />
                       <div style={{ width:3, height:3, borderTop:`1.5px solid ${C.borderHi}60`, borderRight:`1.5px solid ${C.borderHi}60`, transform:'rotate(45deg)', marginLeft:-2 }} />
                     </div>
                     <div style={{ fontFamily:C.mono, fontSize:9, color:route.color, opacity:.75, marginTop:3, whiteSpace:'nowrap' }}>
                       {next.ride}
                     </div>
+                    {next.fuelBefore && (
+                      <div style={{ fontFamily:C.mono, fontSize:8, color:'#f59e0b', opacity:.8, marginTop:2, whiteSpace:'nowrap' }}>
+                        {next.fuelBefore.at}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
