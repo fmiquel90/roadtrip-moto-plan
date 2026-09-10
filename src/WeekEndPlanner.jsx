@@ -39,6 +39,7 @@ const ROUTE = {
   day: 'Samedi',
   googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.1996,-3.1268/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
   gpxUrl: '/trace.gpx',
+  servicesUrl: '/services.gpx',
   waypoints: [
     { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
     { name: 'Mont Bel-Air', type: 'stop', time: '9h43', ride: '43 min', pause: '25 min',
@@ -281,10 +282,30 @@ const RouteBanner = ({ route }) => {
           Aperçu Google Maps
           <ExternalLink size={13} style={{ opacity:0.7 }} />
         </a>
+        <a
+          href={route.servicesUrl}
+          download
+          title="Restos et stations seuls, à charger comme couche de POI séparée"
+          style={{
+            display:'inline-flex', alignItems:'center', gap:10,
+            padding:'13px 22px', borderRadius:12,
+            background:'transparent', color:'#f59e0b',
+            border:'1.5px solid #f59e0b55',
+            fontFamily:C.sans, fontSize:14, fontWeight:700,
+            cursor:'pointer', textDecoration:'none',
+            transition:'all 0.2s',
+          }}
+          onMouseEnter={e=>{ e.currentTarget.style.background='#f59e0b14'; }}
+          onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
+        >
+          <Fuel size={16} />
+          Services seuls (GPX)
+        </a>
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
         GPX = NAVIGATION · 12 REPÈRES (8 ÉTAPES, 2 STATIONS, 2 RESTOS DE REPLI)<br />
         HORAIRES ET TÉLÉPHONES DANS LA DESCRIPTION DE CHAQUE POINT<br />
+        SERVICES.GPX = LES 5 RESTOS ET STATIONS SEULS, EN COUCHE SÉPARÉE<br />
         ITINÉRAIRE 120 POINTS, TRACE 1103 POINTS<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
