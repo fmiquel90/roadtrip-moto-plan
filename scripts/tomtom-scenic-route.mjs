@@ -83,6 +83,15 @@ const MARKERS = [
 const ROUTE_NAME = 'Argoat — Guerlédan & gorges du Daoulas';
 const GPX_OUTPUT_PATH = new URL('../public/trace.gpx', import.meta.url);
 const ITN_OUTPUT_PATH = new URL('../public/trace.itn', import.meta.url);
+const LIBERTY_OUTPUT_PATH = new URL('../public/liberty-rider.gpx', import.meta.url);
+
+// Liberty Rider importe un GPX dans son créateur d'itinéraire, mais recalcule
+// le chemin entre les points — son aide le dit, et conseille elle-même
+// « d'ajouter des étapes là où le tracé ne passe pas pour le forcer ». Elle
+// accepte jusqu'à 99 étapes ; on se cale juste en dessous.
+// Ce fichier ne contient qu'un <rte> : pas de <trk> ni de <wpt>, pour qu'il n'y
+// ait aucune ambiguïté sur ce que l'application doit reprendre.
+const LIBERTY_MAX_POINTS = 95;
 
 // Le .itn est le format d'itinéraire propre à TomTom. Son intérêt ici : il
 // distingue les points de PASSAGE des points d'ARRÊT, ce que le GPX ne sait pas
@@ -93,9 +102,11 @@ const ITN_OUTPUT_PATH = new URL('../public/trace.itn', import.meta.url);
 // Les coordonnées sont des entiers, en degrés multipliés par 100000.
 const ITN_FLAG = { departure: 0, stop: 1, via: 2, destination: 3 };
 
-// Plafond du .itn. Les TomTom anciens s'arrêtaient à 48 points ; les récents
-// acceptent nettement plus. À baisser si l'appareil refuse le fichier.
-const ITN_MAX_POINTS = 100;
+// Le .itn est bâti sur exactement les mêmes points et les mêmes arrêts que le
+// GPX Liberty Rider : deux formats, un seul itinéraire. Le plafond suit donc
+// celui de Liberty Rider, le plus contraignant des deux (les TomTom anciens
+// s'arrêtaient à 48 points, les récents acceptent nettement plus).
+const ITN_MAX_POINTS = LIBERTY_MAX_POINTS;
 
 // 'high' sur les deux : sur ce même tracé, passer de 'normal' à 'high' rallonge
 // nettement la part de voies communales sans coûter de temps.
@@ -224,7 +235,7 @@ function cumulative(points) {
 
 // Les points de forme sont posés sur la géométrie brute, pas sur la trace
 // simplifiée : ils doivent tomber exactement sur la route, pas sur une corde.
-function buildShapingPoints(route, rawPoints) {
+function buildShapingPoints(route, rawPoints, maxPoints = MAX_SHAPING_POINTS) {
   const cum = cumulative(rawPoints);
   const total = cum[cum.length - 1];
   const at = offset => {
@@ -262,7 +273,7 @@ function buildShapingPoints(route, rawPoints) {
   //    redondant — celui dont la suppression laisse le plus petit trou. Un
   //    éclaircissage régulier (un point sur N) ferait l'inverse : les virages
   //    étant groupés dans les portions sinueuses, il viderait les lignes droites.
-  while (chosen.length > MAX_SHAPING_POINTS) {
+  while (chosen.length > maxPoints) {
     let victim = -1, smallest = Infinity;
     for (let i = 1; i < chosen.length - 1; i++) {
       const resulting = chosen[i + 1] - chosen[i - 1];
@@ -380,42 +391,58 @@ function labelRoutePoints(labels, shaping) {
   return byIndex;
 }
 
-function buildItn({ routePoints, labels, shaping }) {
-  // Le .itn est l'itinéraire qu'on roule : les solutions de repli n'y ont pas
-  // leur place. En faire des arrêts enverrait le GPS faire un détour vers
-  // chacune d'elles. Elles restent en <wpt> dans le GPX.
-  const planned = labels.filter(s => s.role !== 'food' && !s.backup);
-  const labelled = labelRoutePoints(planned, shaping);
-  const arrival = planned[planned.length - 1];
+// Séquence commune au GPX Liberty Rider et au .itn : mêmes positions, mêmes
+// arrêts, même ordre. Les deux fichiers en dérivent, donc ils ne peuvent pas
+// diverger — c'est la seule façon de garantir qu'ils décrivent le même trajet.
+function itineraryPoints({ points, shaping, labels }) {
+  const labelled = labelRoutePoints(labels, shaping);
+  const arrival = labels[labels.length - 1];
 
-  // Un point par point de forme, remplacé par l'arrêt lui-même là où il y en a
-  // un : ainsi le .itn tient le tracé ET s'arrête aux bons endroits.
-  let points = routePoints.map((p, i) => {
+  let seq = points.map((p, i) => {
     const item = labelled.get(i);
-    if (!item) return { lat: p.latitude, lon: p.longitude, name: '', flag: ITN_FLAG.via };
-    return { lat: item.lat, lon: item.lon, name: item.name, flag: ITN_FLAG.stop };
+    return item
+      ? { lat: item.lat, lon: item.lon, name: item.name, desc: item.desc, stop: true }
+      : { lat: p.latitude, lon: p.longitude, name: '', desc: '', stop: false };
   });
 
-  // Départ et arrivée sont les deux extrémités, nommées : sans ça l'arrivée
-  // apparaissait deux fois, une fois nommée et une fois vide.
-  points = points.filter((p, i) => !(p.name === arrival.name && i !== points.length - 1));
-  points[0] = { lat: labels[0].lat, lon: labels[0].lon, name: labels[0].name, flag: ITN_FLAG.departure };
-  points[points.length - 1] = { lat: arrival.lat, lon: arrival.lon, name: arrival.name, flag: ITN_FLAG.destination };
+  // L'arrivée est la dernière position, et une seule fois : sans ça elle
+  // figurait à l'avant-dernier rang, suivie d'un point anonyme au même endroit.
+  seq = seq.filter((p, i) => !(p.name === arrival.name && i !== seq.length - 1));
+  seq[seq.length - 1] = { lat: arrival.lat, lon: arrival.lon, name: arrival.name, desc: arrival.desc, stop: true };
+  return seq;
+}
 
-  // Écrêtage : on ne retire que des points de passage, jamais un arrêt, en
-  // commençant par les plus redondants — même règle que pour les <rtept>.
-  while (points.length > ITN_MAX_POINTS) {
-    let victim = -1, smallest = Infinity;
-    for (let i = 1; i < points.length - 1; i++) {
-      if (points[i].flag !== ITN_FLAG.via) continue;
-      const gap = metres(
-        { latitude: points[i - 1].lat, longitude: points[i - 1].lon },
-        { latitude: points[i + 1].lat, longitude: points[i + 1].lon });
-      if (gap < smallest) { smallest = gap; victim = i; }
-    }
-    if (victim === -1) break;   // plus que des arrêts
-    points.splice(victim, 1);
-  }
+// GPX ne contenant qu'un <rte> : chaque point devient une étape dans le
+// créateur d'itinéraire, les arrêts réels étant les seuls à porter un nom.
+function buildLibertyGpx({ name, points, shaping, labels }) {
+  const rtepts = itineraryPoints({ points, shaping, labels }).map(p => {
+    if (!p.stop) return `    <rtept lat="${p.lat}" lon="${p.lon}"></rtept>`;
+    return `    <rtept lat="${p.lat}" lon="${p.lon}">` +
+      `<name>${esc(p.name)}</name><desc>${esc(p.desc)}</desc></rtept>`;
+  }).join('\n');
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>${esc(name)}</name></metadata>
+  <rte>
+    <name>${esc(name)}</name>
+${rtepts}
+  </rte>
+</gpx>
+`;
+}
+
+// Même séquence que le GPX Liberty Rider, traduite dans le format TomTom : les
+// arrêts y sont annoncés, les autres points restent muets. C'est là tout
+// l'intérêt du .itn — le GPX ne sait pas faire cette distinction.
+function buildItn({ routePoints, labels, shaping }) {
+  const seq = itineraryPoints({ points: routePoints, shaping, labels });
+  const points = seq.map((p, i) => ({
+    ...p,
+    flag: i === 0 ? ITN_FLAG.departure
+      : i === seq.length - 1 ? ITN_FLAG.destination
+        : p.stop ? ITN_FLAG.stop : ITN_FLAG.via,
+  }));
 
   const coord = v => Math.round(v * 100000);
   // Le séparateur du format est la barre verticale : elle ne doit pas figurer
@@ -501,7 +528,26 @@ async function main() {
 
   const labels = orderedWaypoints(trackPoints);
 
-  const itn = buildItn({ routePoints, labels, shaping });
+  // Un seul jeu de points et un seul jeu d'arrêts pour les deux fichiers
+  // d'itinéraire : le GPX Liberty Rider et le .itn décrivent rigoureusement la
+  // même chose. Les replis en sont exclus — en faire des étapes enverrait
+  // l'appareil faire un détour vers chacune.
+  const libertyShaping = buildShapingPoints(route, allPoints, LIBERTY_MAX_POINTS);
+  const plannedLabels = labels.filter(s => s.role !== 'food' && !s.backup);
+
+  const itinerary = itineraryPoints({
+    points: libertyShaping.points, shaping: libertyShaping, labels: plannedLabels,
+  });
+  writeFileSync(LIBERTY_OUTPUT_PATH, buildLibertyGpx({
+    name: ROUTE_NAME, points: libertyShaping.points, shaping: libertyShaping, labels: plannedLabels,
+  }));
+  console.log(`\nGPX Liberty Rider écrit : ${LIBERTY_OUTPUT_PATH.pathname}`);
+  console.log(`  ${itinerary.length} étapes (plafond de l'appli : 99), dont ` +
+    `${itinerary.filter(p => p.stop).length} nommées`);
+
+  const itn = buildItn({
+    routePoints: libertyShaping.points, labels: plannedLabels, shaping: libertyShaping,
+  });
   writeFileSync(ITN_OUTPUT_PATH, itn);
   const itnLines = itn.trim().split('\n');
   const itnStops = itnLines.filter(l => !l.endsWith('|2|')).length;
