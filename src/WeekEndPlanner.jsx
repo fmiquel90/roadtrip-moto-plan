@@ -71,20 +71,20 @@ const ROUTE = {
     { name: 'D44 (gorges du Daoulas)', km: '6,9 km' },
   ],
   lunch: [
-    { name: 'Hôtel Restaurant Le Beau Rivage', town: 'Beau Rivage, 22530 Caurel',
-      hours: 'Samedi 9h — minuit', phone: '02 96 28 52 15',
-      note: 'Service large : aucun stress si tu arrives en retard.',
-      query: 'Hôtel Restaurant Le Beau Rivage Caurel' },
     { name: "L'Embarcadère", town: 'Beau Rivage, 22530 Caurel',
       hours: 'Samedi 9h — minuit', phone: '02 96 28 52 64',
-      note: 'Les Vedettes de Guerlédan, au ponton.',
+      note: 'Au ponton des Vedettes de Guerlédan, les pieds dans le lac. Service continu.',
       query: "Restaurant l'Embarcadère Beau Rivage Caurel" },
     { name: "Cap'Tain Cook", town: '56 Rue Roc Hell, 22530 Caurel',
       hours: 'Samedi 9h — 22h', phone: '02 96 67 11 00',
-      note: 'Repli si les deux premiers sont complets.',
+      note: 'Sans façon, à 1,5 km du ponton.',
       query: "Cap'Tain Cook Caurel" },
+    { name: 'Betty Food', town: '3 Le Mané, 22530 Caurel',
+      hours: 'Samedi 11h — 23h', phone: '',
+      note: 'Snack, à 680 m. Si tu veux expédier le déjeuner et rouler plus.',
+      query: 'Betty Food Caurel' },
   ],
-  lunchWarning: "À éviter : l'Auberge de Guerlédan ne sert que de 12h à 13h. Horaires issus de la base TomTom, déclaratifs — appelle pour réserver.",
+  lunchWarning: "À éviter : l'Auberge de Guerlédan ne sert que de 12h à 13h. Il y a aussi La Dame du Lac à 90 m du point de déjeuner, en bord d'eau — mais la base la classe en bar et ne donne aucun horaire, à tenter au 06 63 43 24 24. Horaires déclaratifs — appelle pour réserver.",
   coffee: { name: "Café de l'Abbaye", town: 'Bon-Repos-sur-Blavet', phone: '02 96 24 91 06',
     hours: '10h — 19h en continu, 7j/7', note: 'À 179 m de l’abbaye : le café de 14h39.' },
   fuel: {
@@ -358,10 +358,12 @@ const SidebarInfoBlock = ({ route }) => {
                 <span style={{ fontFamily:C.mono, fontSize:10, color:route.color, background:`${route.color}18`, padding:'2px 7px', borderRadius:5 }}>
                   {l.hours}
                 </span>
-                <a href={`tel:${l.phone.replace(/\s/g, '')}`}
-                  style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:11, color:'#8899aa', textDecoration:'none' }}>
-                  <Phone size={10} />{l.phone}
-                </a>
+                {l.phone && (
+                  <a href={`tel:${l.phone.replace(/\s/g, '')}`}
+                    style={{ display:'inline-flex', alignItems:'center', gap:4, fontSize:11, color:'#8899aa', textDecoration:'none' }}>
+                    <Phone size={10} />{l.phone}
+                  </a>
+                )}
               </div>
               <div style={{ fontSize:11, color:'#8899aa', marginTop:6, lineHeight:1.5 }}>{l.note}</div>
             </div>
