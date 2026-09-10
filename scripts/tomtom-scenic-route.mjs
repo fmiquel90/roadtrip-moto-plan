@@ -69,8 +69,18 @@ const WINDINGNESS = 'high';
 // milliers de points ; un GPS moto n'en a pas besoin d'autant pour suivre la route.
 const TRACK_TOLERANCE_M = 12;
 
-// Nombre de points de forme de l'itinéraire <rte>, destiné à l'import TomTom.
-const ROUTE_SHAPING_POINTS = 40;
+// Points de forme du <rte>. Entre deux points de forme, le GPS recalcule avec son
+// propre profil : trop espacés, il quitte le tracé. Mesuré sur la version à 40
+// points répartis à l'index, 19 segments sur 39 divergeaient, jusqu'à 1,5 km.
+// D'où deux règles : un point juste après chaque intersection où l'on tourne (là
+// où un recalcul peut partir ailleurs), et du remplissage pour qu'aucun trou ne
+// dépasse MAX_GAP_M sur les longues portions sans intersection.
+const MAX_GAP_M = 2500;
+const TURN_OFFSET_M = 120;   // on pose le point APRÈS le virage, pas dessus :
+                             // sur l'intersection même, le GPS peut l'accrocher
+                             // à la mauvaise branche.
+// Plafond : au-delà, certains GPS refusent l'itinéraire. À baisser si le tien râle.
+const MAX_SHAPING_POINTS = 120;
 
 function isRealStop(role) {
   return role !== 'shape';
@@ -90,17 +100,24 @@ async function calculateRoute() {
   return (await res.json()).routes[0];
 }
 
-// Douglas-Peucker sur la distance perpendiculaire, en degrés (suffisant à cette échelle).
+// Douglas-Peucker sur la distance perpendiculaire.
+// Les longitudes sont remises à l'échelle par cos(latitude) : à 48°N un degré de
+// longitude vaut ~74 km contre ~111 km pour un degré de latitude. Sans cette
+// correction la tolérance valait en réalité ~18 m est-ouest pour 12 m nord-sud,
+// et la trace coupait les virages davantage dans un sens que dans l'autre.
 function simplify(points, toleranceM) {
-  const tol = toleranceM / 111320;
   if (points.length < 3) return points;
+  const tol = toleranceM / 111320;
+  const midLat = points[Math.floor(points.length / 2)].latitude;
+  const kx = Math.cos(midLat * Math.PI / 180);
 
   const perpendicular = (p, a, b) => {
-    const dx = b.longitude - a.longitude, dy = b.latitude - a.latitude;
-    if (dx === 0 && dy === 0) return Math.hypot(p.longitude - a.longitude, p.latitude - a.latitude);
-    const t = ((p.longitude - a.longitude) * dx + (p.latitude - a.latitude) * dy) / (dx * dx + dy * dy);
+    const dx = (b.longitude - a.longitude) * kx, dy = b.latitude - a.latitude;
+    const px = (p.longitude - a.longitude) * kx, py = p.latitude - a.latitude;
+    if (dx === 0 && dy === 0) return Math.hypot(px, py);
+    const t = (px * dx + py * dy) / (dx * dx + dy * dy);
     const c = Math.max(0, Math.min(1, t));
-    return Math.hypot(p.longitude - (a.longitude + c * dx), p.latitude - (a.latitude + c * dy));
+    return Math.hypot(px - c * dx, py - c * dy);
   };
 
   const keep = new Uint8Array(points.length);
@@ -121,10 +138,71 @@ function simplify(points, toleranceM) {
   return points.filter((_, i) => keep[i]);
 }
 
-function sampleEvenly(points, count) {
-  if (points.length <= count) return points;
-  const stride = (points.length - 1) / (count - 1);
-  return Array.from({ length: count }, (_, i) => points[Math.round(i * stride)]);
+const EARTH_R = 6371000;
+function metres(a, b) {
+  const r = Math.PI / 180;
+  const dLat = (b.latitude - a.latitude) * r, dLon = (b.longitude - a.longitude) * r;
+  const h = Math.sin(dLat / 2) ** 2 +
+    Math.cos(a.latitude * r) * Math.cos(b.latitude * r) * Math.sin(dLon / 2) ** 2;
+  return 2 * EARTH_R * Math.asin(Math.sqrt(h));
+}
+
+function cumulative(points) {
+  const cum = [0];
+  for (let i = 1; i < points.length; i++) cum[i] = cum[i - 1] + metres(points[i - 1], points[i]);
+  return cum;
+}
+
+// Les points de forme sont posés sur la géométrie brute, pas sur la trace
+// simplifiée : ils doivent tomber exactement sur la route, pas sur une corde.
+function buildShapingPoints(route, rawPoints) {
+  const cum = cumulative(rawPoints);
+  const total = cum[cum.length - 1];
+  const at = offset => {
+    const target = Math.max(0, Math.min(total, offset));
+    let lo = 0, hi = cum.length - 1;
+    while (lo < hi) { const mid = (lo + hi) >> 1; if (cum[mid] < target) lo = mid + 1; else hi = mid; }
+    return lo;
+  };
+
+  // Obligatoires : les extrémités et un point après chaque intersection où l'on
+  // tourne. Ce sont les endroits où un recalcul peut partir sur une autre route.
+  const must = new Set([0, total]);
+  for (const ins of route.guidance?.instructions ?? []) {
+    if (!/TURN|ROUNDABOUT|KEEP|BEAR|FORK|EXIT/i.test(ins.maneuver ?? '')) continue;
+    const o = ins.routeOffsetInMeters + TURN_OFFSET_M;
+    if (o > 0 && o < total) must.add(o);
+  }
+
+  let chosen = [...must].sort((a, b) => a - b);
+  const turnCount = chosen.length;
+
+  // 1. Combler : aucun trou au-dessus de MAX_GAP_M, y compris sur les longues
+  //    portions sans intersection — le GPS peut aussi filer par une parallèle
+  //    plus directe sans qu'aucun virage ne figure dans le guidage.
+  for (let i = 1; i < chosen.length; i++) {
+    const gap = chosen[i] - chosen[i - 1];
+    if (gap <= MAX_GAP_M) continue;
+    const n = Math.ceil(gap / MAX_GAP_M);
+    const inserts = Array.from({ length: n - 1 }, (_, k) => chosen[i - 1] + (gap * (k + 1)) / n);
+    chosen.splice(i, 0, ...inserts);
+    i += inserts.length;
+  }
+
+  // 2. Éclaircir jusqu'au plafond en retirant à chaque tour le point le plus
+  //    redondant — celui dont la suppression laisse le plus petit trou. Un
+  //    éclaircissage régulier (un point sur N) ferait l'inverse : les virages
+  //    étant groupés dans les portions sinueuses, il viderait les lignes droites.
+  while (chosen.length > MAX_SHAPING_POINTS) {
+    let victim = -1, smallest = Infinity;
+    for (let i = 1; i < chosen.length - 1; i++) {
+      const resulting = chosen[i + 1] - chosen[i - 1];
+      if (resulting < smallest) { smallest = resulting; victim = i; }
+    }
+    chosen.splice(victim, 1);
+  }
+
+  return { points: chosen.map(o => rawPoints[at(o)]), offsets: chosen, total, turnCount };
 }
 
 function formatDuration(seconds) {
@@ -225,7 +303,13 @@ async function main() {
 
   const allPoints = route.legs.flatMap(leg => leg.points);
   const trackPoints = simplify(allPoints, TRACK_TOLERANCE_M);
-  const routePoints = sampleEvenly(trackPoints, ROUTE_SHAPING_POINTS);
+  const shaping = buildShapingPoints(route, allPoints);
+  const routePoints = shaping.points;
+
+  const gaps = shaping.offsets.slice(1).map((o, i) => o - shaping.offsets[i]);
+  console.log(`\nPoints de forme : ${routePoints.length} (dont ${shaping.turnCount} intersections)` +
+    ` · trou moyen ${Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length)} m` +
+    ` · plus grand trou ${Math.round(Math.max(...gaps))} m`);
 
   // Lien Google Maps construit sur les arrêts réels, pas sur des points échantillonnés
   // au hasard dans la trace : au moins les étapes y sont, même si Google recalcule
