@@ -111,6 +111,21 @@ const TURN_OFFSET_M = 120;   // on pose le point APRÈS le virage, pas dessus :
 // Plafond : au-delà, certains GPS refusent l'itinéraire. À baisser si le tien râle.
 const MAX_SHAPING_POINTS = 120;
 
+// Faut-il écrire un <rte> ?
+//
+// Non, par défaut. Un <rte> de 120 points de forme sert à un GPS qui SUIT une
+// route : il l'empêche de recalculer par ailleurs. Mais un planificateur, lui,
+// LISTE chaque <rtept> comme une étape — plan.tomtom.com affiche « 118 steps »
+// numérotées — et il nomme ces étapes par leur adresse, en ignorant le <name>
+// du fichier. Les points de forme deviennent alors un mur de numéros au milieu
+// duquel le déjeuner et la station sont introuvables.
+//
+// Sans <rte>, le fichier se réduit à ce que tous les outils lisent de la même
+// façon : une trace exacte, et des points nommés. Contrepartie assumée : plus
+// de recalcul guidé si l'on quitte l'itinéraire — la trace montre la route,
+// elle ne la fait pas recalculer.
+const INCLUDE_ROUTE = false;
+
 function isRealStop(role) {
   return role !== 'shape';
 }
@@ -366,15 +381,17 @@ function buildGpx({ name, trackPoints, routePoints, labels, shaping }) {
     `      <trkpt lat="${p.latitude}" lon="${p.longitude}"></trkpt>`
   ).join('\n');
 
+  const rteBlock = INCLUDE_ROUTE ? `  <rte>
+    <name>${esc(name)} (itinéraire)</name>
+${rtepts}
+  </rte>
+` : '';
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
   <metadata><name>${esc(name)}</name></metadata>
 ${wpts}
-  <rte>
-    <name>${esc(name)} (itinéraire)</name>
-${rtepts}
-  </rte>
-  <trk>
+${rteBlock}  <trk>
     <name>${esc(name)} (trace)</name>
     <trkseg>
 ${trkpts}
@@ -415,8 +432,10 @@ async function main() {
   writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints, labels, shaping }));
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
   console.log(`  ${allPoints.length} points bruts -> ${trackPoints.length} points de trace (tolérance ${TRACK_TOLERANCE_M} m)`);
-  console.log(`  ${routePoints.length} points de forme dans <rte>, ${realStops.length} étapes` +
-    ` + ${MARKERS.length} repère(s) hors tracé en <wpt>`);
+  console.log(`  ${realStops.length} étapes + ${MARKERS.length} repère(s) hors tracé, nommés en <wpt>`);
+  console.log(INCLUDE_ROUTE
+    ? `  <rte> de ${routePoints.length} points de forme (un planificateur les listera comme autant d'étapes)`
+    : `  pas de <rte> : la trace seule, pour que les outils n'affichent pas 120 étapes numérotées`);
 }
 
 main().catch(err => {

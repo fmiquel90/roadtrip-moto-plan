@@ -288,7 +288,7 @@ const RouteBanner = ({ route }) => {
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
         GPX = NAVIGATION · 12 REPÈRES NUMÉROTÉS DANS L’ORDRE DE LA ROUTE<br />
         DÉJEUNER, PLEIN ET OPTIONS NOMMÉS EN CLAIR · KM, HORAIRES ET TÉLÉPHONES EN DESCRIPTION<br />
-        ITINÉRAIRE 120 POINTS, TRACE 1103 POINTS<br />
+        TRACE DE 1103 POINTS, SANS ÉTAPES NUMÉROTÉES PARASITES<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>
