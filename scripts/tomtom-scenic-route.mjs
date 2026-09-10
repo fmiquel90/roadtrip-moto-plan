@@ -1,3 +1,5 @@
+import { writeFileSync } from 'node:fs';
+
 const API_KEY = process.env.TOMTOM_API_KEY;
 if (!API_KEY) {
   console.error('Missing TOMTOM_API_KEY. Run with: node --env-file=.env scripts/tomtom-scenic-route.mjs');
@@ -16,13 +18,18 @@ if (!API_KEY) {
 // shorter Dinard/Saint-Cast side is left for the way home — so the final leg
 // back to Hénansal is short instead of a long 57km slog after lunch.
 const STOPS = [
-  { query: 'Hénansal, France', kind: 'address', role: 'stop' },
-  { query: 'Menhir du Champ Dolent, Dol-de-Bretagne', kind: 'poi', role: 'stop' },
-  { query: 'Abbaye du Mont-Saint-Michel', kind: 'poi', role: 'stop' },
-  { query: 'Bistro du Mont, Beauvoir', kind: 'poi', role: 'lunch' },
-  { query: 'Port de Cancale', kind: 'poi', role: 'stop' },
-  { query: 'Hénansal, France', kind: 'address', role: 'stop' },
+  { name: 'Hénansal (départ)', query: 'Hénansal, France', kind: 'address', role: 'stop' },
+  { name: 'Binic', query: 'Port de Binic', kind: 'poi', role: 'stop' },
+  { name: 'Pointe de l\'Arcouest', query: "Pointe de l'Arcouest, Ploubazlanec", kind: 'poi', role: 'stop' },
+  { name: 'Pointe du Château', query: 'Pointe du Château, Perros-Guirec', kind: 'poi', role: 'stop' },
+  { name: "Ploumanac'h (déjeuner)", query: 'Le Men Ruz, Perros-Guirec', kind: 'poi', role: 'lunch' },
+  { name: 'Île Renote', query: 'Île Renote, Trégastel', kind: 'poi', role: 'stop' },
+  { name: 'Guingamp', query: 'Guingamp, France', kind: 'address', role: 'stop' },
+  { name: 'Hénansal (retour)', query: 'Hénansal, France', kind: 'address', role: 'stop' },
 ];
+
+// Output path for the generated GPX track.
+const GPX_OUTPUT_PATH = new URL('../public/granit-rose.gpx', import.meta.url);
 
 const HILLINESS = 'normal';
 const WINDINGNESS = 'normal';
@@ -97,22 +104,25 @@ async function main() {
   console.log('Resolving stops (POIs & addresses)...');
   const coords = [];
   const labels = [];
+  const names = [];
   for (const stop of STOPS) {
     const c = stop.kind === 'poi' ? await searchPOI(stop.query) : await geocodeAddress(stop.query);
     coords.push(c);
     labels.push(stop.query);
+    names.push(stop.name || stop.query);
     await new Promise(r => setTimeout(r, 500));
 
     if (stop.role === 'lunch') {
       const fuel = await nearbyFuelStop(c);
-      if (fuel) { coords.push(fuel); labels.push('(fuel stop)'); }
+      if (fuel) { coords.push(fuel); labels.push('(fuel stop)'); names.push('Station-service'); }
       await new Promise(r => setTimeout(r, 500));
     }
   }
 
   const locations = coords.map(c => `${c.lat},${c.lon}`).join(':');
   const routeUrl = `https://api.tomtom.com/routing/1/calculateRoute/${locations}/json` +
-    `?key=${API_KEY}&travelMode=motorcycle&routeType=thrilling&hilliness=${HILLINESS}&windingness=${WINDINGNESS}`;
+    `?key=${API_KEY}&travelMode=motorcycle&routeType=thrilling&hilliness=${HILLINESS}&windingness=${WINDINGNESS}` +
+    `&instructionsType=text&language=fr-FR`;
 
   console.log('\nCalling TomTom Routing API (thrilling / motorcycle)...');
   const res = await fetch(routeUrl);
@@ -134,11 +144,44 @@ async function main() {
     console.log(`  -> ${labels[i + 1]}: +${Math.round(leg.summary.lengthInMeters / 1000)}km (cumulative ${Math.round(cumulative / 1000)}km, ${pct}%)`);
   });
 
+  if (route.guidance?.instructions) {
+    const roads = [...new Set(
+      route.guidance.instructions.map(ins => ins.roadNumbers?.[0] || ins.street).filter(Boolean)
+    )];
+    console.log('\nRoad numbers / streets used:', roads.join(', '));
+  }
+
   const allPoints = route.legs.flatMap(leg => leg.points);
   const sampled = sampleEvenly(allPoints, SAMPLE_COUNT).map(p => `${p.latitude},${p.longitude}`);
 
   const mapsUrl = `https://www.google.com/maps/dir/${sampled.join('/')}`;
   console.log(`\nGoogle Maps: ${mapsUrl}`);
+
+  const gpx = buildGpx({ name: 'Côte de Granit Rose', coords, names, trackPoints: allPoints });
+  writeFileSync(GPX_OUTPUT_PATH, gpx);
+  console.log(`\nGPX written to ${GPX_OUTPUT_PATH.pathname} (${allPoints.length} track points, ${coords.length} waypoints)`);
+}
+
+function buildGpx({ name, coords, names, trackPoints }) {
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const wpts = coords.map((c, i) =>
+    `  <wpt lat="${c.lat}" lon="${c.lon}"><name>${esc(names[i])}</name></wpt>`
+  ).join('\n');
+  const trkpts = trackPoints.map(p =>
+    `      <trkpt lat="${p.latitude}" lon="${p.longitude}"></trkpt>`
+  ).join('\n');
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata><name>${esc(name)}</name></metadata>
+${wpts}
+  <trk>
+    <name>${esc(name)}</name>
+    <trkseg>
+${trkpts}
+    </trkseg>
+  </trk>
+</gpx>
+`;
 }
 
 main().catch(err => {
