@@ -44,11 +44,17 @@ const STOPS = [
   { name: 'Gorges du Daoulas',       lat: 48.2270,    lon: -3.1230,    role: 'shape' },
   { name: 'Saint-Nicolas-du-Pélem',  lat: 48.3154,    lon: -3.1599,    role: 'shape' },
   { name: 'Le Haut-Corlay',          lat: 48.3217,    lon: -3.0564,    role: 'shape' },
-  // Le plein se fait ici et pas à mi-parcours : la seule station de la zone du lac
-  // est l'Intermarché de Mûr-de-Bretagne, et le crochet pour l'atteindre ramenait
-  // 7 km de D767 sur le tracé en plus de casser le rythme juste avant le déjeuner.
-  { name: 'Quintin (plein)',         lat: 48.4033,    lon: -2.9100,    role: 'fuel'  },
+  { name: 'Quintin',                 lat: 48.4033,    lon: -2.9100,    role: 'stop'  },
   { name: 'Hénansal (retour)',       lat: 48.5409784, lon: -2.4330858, role: 'stop'  },
+];
+
+// Repères posés sur la carte du GPS sans entrer dans le calcul d'itinéraire.
+// La station est à 980 m du tracé : en faire un point de passage obligerait
+// TomTom à recomposer toute la branche pour y aller (l'essai précédent ramenait
+// 7 km de D767). En simple <wpt>, elle s'affiche sur le GPS et le tracé ne bouge
+// pas — tu fais le crochet de 2 km aller-retour quand tu la vois.
+const MARKERS = [
+  { name: 'Plein — Intermarché Mûr-de-Bretagne', lat: 48.1985, lon: -2.9871, role: 'fuel' },
 ];
 
 const ROUTE_NAME = 'Argoat — Guerlédan & gorges du Daoulas';
@@ -173,8 +179,9 @@ function reportRoads(route) {
 function buildGpx({ name, trackPoints, routePoints }) {
   const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-  // Les arrêts réels seulement : les points de forme n'ont rien à faire dans le roadbook.
-  const wpts = STOPS.filter(s => isRealStop(s.role)).map(s =>
+  // Les arrêts réels et les repères hors tracé : les points de forme n'ont rien
+  // à faire dans le roadbook.
+  const wpts = [...STOPS.filter(s => isRealStop(s.role)), ...MARKERS].map(s =>
     `  <wpt lat="${s.lat}" lon="${s.lon}"><name>${esc(s.name)}</name><type>${s.role}</type></wpt>`
   ).join('\n');
 
@@ -230,7 +237,8 @@ async function main() {
   writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints }));
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
   console.log(`  ${allPoints.length} points bruts -> ${trackPoints.length} points de trace (tolérance ${TRACK_TOLERANCE_M} m)`);
-  console.log(`  ${routePoints.length} points de forme dans <rte>, ${realStops.length} étapes en <wpt>`);
+  console.log(`  ${routePoints.length} points de forme dans <rte>, ${realStops.length} étapes` +
+    ` + ${MARKERS.length} repère(s) hors tracé en <wpt>`);
 }
 
 main().catch(err => {

@@ -7,8 +7,9 @@
   <wpt lat="48.206" lon="-3.047"><name>Beau Rivage (déjeuner)</name><type>lunch</type></wpt>
   <wpt lat="48.1996" lon="-3.1268"><name>Les Forges des Salles</name><type>stop</type></wpt>
   <wpt lat="48.2128" lon="-3.1282"><name>Abbaye de Bon-Repos</name><type>stop</type></wpt>
-  <wpt lat="48.4033" lon="-2.91"><name>Quintin (plein)</name><type>fuel</type></wpt>
+  <wpt lat="48.4033" lon="-2.91"><name>Quintin</name><type>stop</type></wpt>
   <wpt lat="48.5409784" lon="-2.4330858"><name>Hénansal (retour)</name><type>stop</type></wpt>
+  <wpt lat="48.1985" lon="-2.9871"><name>Plein — Intermarché Mûr-de-Bretagne</name><type>fuel</type></wpt>
   <rte>
     <name>Argoat — Guerlédan &amp; gorges du Daoulas (itinéraire)</name>
     <rtept lat="48.54098" lon="-2.43309"></rtept>

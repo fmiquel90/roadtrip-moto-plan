@@ -46,11 +46,12 @@ const ROUTE = {
     { name: 'Beau Rivage', type: 'lunch', time: '12h14', ride: '47 min', pause: '1h15',
       day: 'Déjeuner au bord du lac', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
     { name: 'Les Forges des Salles', type: 'stop', time: '14h18', ride: '49 min', pause: '40 min',
-      day: 'Village-usine du XVIIIᵉ · samedi 14h-18h', via: ['Écluse de Guerlédan', 'Anse de Sordan'] },
+      day: 'Village-usine du XVIIIᵉ · samedi 14h-18h',
+      via: ['Plein à Mûr-de-Bretagne (km 114)', 'Écluse de Guerlédan', 'Anse de Sordan'] },
     { name: 'Abbaye de Bon-Repos', type: 'stop', time: '15h08', ride: '10 min', pause: '20 min',
       day: 'Ruines & Café de l’Abbaye, 4 km plus loin' },
-    { name: 'Quintin', type: 'fuel', time: '16h30', ride: '62 min', pause: '40 min',
-      day: 'Plein + cité de caractère', via: ['Gorges du Daoulas', 'Saint-Nicolas-du-Pélem', 'Le Haut-Corlay'] },
+    { name: 'Quintin', type: 'stop', time: '16h30', ride: '62 min', pause: '40 min',
+      day: 'Cité de caractère · station de repli', via: ['Gorges du Daoulas', 'Saint-Nicolas-du-Pélem', 'Le Haut-Corlay'] },
     { name: 'Hénansal', type: 'end', time: '18h14', ride: '64 min', day: 'Retour' },
   ],
   highlights: [
@@ -88,11 +89,11 @@ const ROUTE = {
   coffee: { name: "Café de l'Abbaye", town: 'Bon-Repos-sur-Blavet', phone: '02 96 24 91 06',
     hours: '10h — 19h en continu, 7j/7', note: 'À 179 m de l’abbaye : le café de 14h39.' },
   fuel: {
-    name: 'Système U', town: 'Rue de la Corderie, 22800 Quintin',
-    hours: 'Samedi 9h — 22h', at: 'km 179 (79 %)',
-    why: "Le plein à mi-parcours imposait un crochet par l'Intermarché de Mûr-de-Bretagne : 7,3 km de D767 en plus et une session de 31 min juste avant le déjeuner. Supprimé.",
-    backup: "Filet de sécurité : Intermarché de Mûr-de-Bretagne (7j/7, 9h-19h), à 4 km du restaurant.",
-    warning: "Ne compte pas sur la TotalEnergies de Bon-Repos : samedi 9h-12h seulement, on y passe vers 14h30.",
+    name: 'Intermarché', town: '5 Rue de Pontivy, 22530 Guerlédan (Mûr-de-Bretagne)',
+    hours: 'Samedi 9h — 19h, 7j/7', at: 'km 114 (51 %) · 980 m du tracé',
+    why: "6 km après le déjeuner, en tout début de session : tu sors de table, tu fais le plein, il te reste 111 km. Le crochet coûte 2 km aller-retour.",
+    backup: "Repli : Système U de Quintin (km 177, samedi 9h-22h, 545 m du tracé) — tu y es arrêté 40 min de toute façon.",
+    warning: "Deux stations idéalement placées mais inutilisables ce jour-là : la TotalEnergies de Bon-Repos (22 m du tracé, mais samedi 9h-12h et on y passe vers 15h) et le Carrefour de Corlay (212 m du tracé, fermé le samedi).",
   },
   /* Galerie dans l'ordre de la journée. Chaque vignette a été regardée avant
    * d'être retenue : la première version puisait dans le fonds numérisé des
@@ -258,7 +259,7 @@ const RouteBanner = ({ route }) => {
         </a>
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
-        GPX = NAVIGATION · 7 ÉTAPES, ITINÉRAIRE 40 POINTS, TRACE 1168 POINTS<br />
+        GPX = NAVIGATION · 8 ÉTAPES + LA STATION, ITINÉRAIRE 40 POINTS, TRACE 1168 POINTS<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>
