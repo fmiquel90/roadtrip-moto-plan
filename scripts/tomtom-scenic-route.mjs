@@ -325,15 +325,41 @@ function orderedWaypoints(trackPoints) {
   return all.map(s => ({ ...s, desc: `km ${Math.round(s.km)} · ${s.desc}` }));
 }
 
-function buildGpx({ name, trackPoints, routePoints }) {
+// Un GPX contient trois structures indépendantes : <wpt>, <rte> et <trk>. Les
+// noms ne vivaient que dans les <wpt>, or beaucoup d'appareils n'affichent que
+// l'itinéraire — soit 120 points de forme anonymes, les repères étant rangés
+// ailleurs en favoris, voire ignorés. On reporte donc chaque libellé sur le
+// point d'itinéraire le plus proche : le déjeuner et la station deviennent
+// visibles dans l'itinéraire lui-même, sans rien déplacer.
+function labelRoutePoints(labels, shaping) {
+  const byIndex = new Map();
+  for (const item of labels) {
+    let best = Infinity, at = -1;
+    for (let i = 0; i < shaping.offsets.length; i++) {
+      const d = Math.abs(shaping.offsets[i] / 1000 - item.km);
+      if (d < best) { best = d; at = i; }
+    }
+    // Deux libellés ne peuvent pas partager le même point de forme.
+    while (byIndex.has(at) && at < shaping.offsets.length - 1) at++;
+    byIndex.set(at, item);
+  }
+  return byIndex;
+}
+
+function buildGpx({ name, trackPoints, routePoints, labels, shaping }) {
   // Les arrêts réels et les repères hors tracé, rangés dans l'ordre de passage :
   // les points de forme n'ont rien à faire dans le roadbook.
-  const wpts = orderedWaypoints(trackPoints).map(waypointXml).join('\n');
+  const wpts = labels.map(waypointXml).join('\n');
+  const labelled = labelRoutePoints(labels, shaping);
 
   // <rte> : itinéraire léger, c'est ce qu'un TomTom sait recalculer.
-  const rtepts = routePoints.map(p =>
-    `    <rtept lat="${p.latitude}" lon="${p.longitude}"></rtept>`
-  ).join('\n');
+  const rtepts = routePoints.map((p, i) => {
+    const item = labelled.get(i);
+    if (!item) return `    <rtept lat="${p.latitude}" lon="${p.longitude}"></rtept>`;
+    const inner = `<name>${esc(item.name)}</name><desc>${esc(item.desc)}</desc>` +
+      `<cmt>${esc(item.desc)}</cmt>` + (item.sym ? `<sym>${esc(item.sym)}</sym>` : '');
+    return `    <rtept lat="${p.latitude}" lon="${p.longitude}">${inner}</rtept>`;
+  }).join('\n');
 
   // <trk> : la trace fidèle, pour vérifier le tracé exact.
   const trkpts = trackPoints.map(p =>
@@ -385,7 +411,8 @@ async function main() {
   const mapsUrl = `https://www.google.com/maps/dir/${realStops.map(s => `${s.lat},${s.lon}`).join('/')}`;
   console.log(`\nGoogle Maps (aperçu, ${realStops.length} étapes) : ${mapsUrl}`);
 
-  writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints }));
+  const labels = orderedWaypoints(trackPoints);
+  writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints, labels, shaping }));
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);
   console.log(`  ${allPoints.length} points bruts -> ${trackPoints.length} points de trace (tolérance ${TRACK_TOLERANCE_M} m)`);
   console.log(`  ${routePoints.length} points de forme dans <rte>, ${realStops.length} étapes` +
