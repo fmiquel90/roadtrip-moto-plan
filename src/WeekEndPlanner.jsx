@@ -39,8 +39,15 @@ const ROUTE = {
   day: 'Samedi',
   googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.1996,-3.1268/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
   gpxUrl: '/trace.gpx',
-  itnUrl: '/trace.itn',
-  libertyUrl: '/liberty-rider.gpx',
+  // Deux moitiés coupées au déjeuner : chacune sous le plafond de 99 étapes de
+  // Liberty Rider, donc assez dense pour que le TomTom Rider et le téléphone
+  // recalculent le même chemin. Mêmes fichiers pour les deux pilotes.
+  halves: [
+    { label: '1. Matin', gpx: '/argoat-1-matin.gpx', itn: '/argoat-1-matin.itn',
+      detail: '106 km · Hénansal → Bel-Air → Bosméléac → déjeuner' },
+    { label: '2. Après-midi', gpx: '/argoat-2-apres-midi.gpx', itn: '/argoat-2-apres-midi.itn',
+      detail: '123 km · déjeuner → plein → Forges → Bon-Repos → Quintin → Hénansal' },
+  ],
   waypoints: [
     { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
     { name: 'Mont Bel-Air', type: 'stop', time: '9h43', ride: '43 min', pause: '25 min',
@@ -264,7 +271,7 @@ const RouteBanner = ({ route }) => {
           onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=`0 4px 24px ${route.color}50`; }}
         >
           <Download size={16} />
-          Télécharger la trace GPX
+          Trace complète (.gpx)
         </a>
         <a
           href={route.googleMapsUrl}
@@ -286,51 +293,36 @@ const RouteBanner = ({ route }) => {
           Aperçu Google Maps
           <ExternalLink size={13} style={{ opacity:0.7 }} />
         </a>
-        <a
-          href={route.itnUrl}
-          download
-          title="À copier sur l'appareil par câble USB — plan.tomtom.com n'importe pas ce format"
-          style={{
-            display:'inline-flex', alignItems:'center', gap:10,
-            padding:'13px 22px', borderRadius:12,
-            background:'transparent', color:route.color,
-            border:`1.5px solid ${route.color}60`,
-            fontFamily:C.sans, fontSize:14, fontWeight:700,
-            cursor:'pointer', textDecoration:'none',
-            transition:'all 0.2s',
-          }}
-          onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
-          onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
-        >
-          <Download size={16} />
-          TomTom .itn (par USB)
-        </a>
-        <a
-          href={route.libertyUrl}
-          download
-          title="94 étapes sous le plafond de 99 de l'appli — même itinéraire que le .itn"
-          style={{
-            display:'inline-flex', alignItems:'center', gap:10,
-            padding:'13px 22px', borderRadius:12,
-            background:'transparent', color:route.color,
-            border:`1.5px solid ${route.color}60`,
-            fontFamily:C.sans, fontSize:14, fontWeight:700,
-            cursor:'pointer', textDecoration:'none',
-            transition:'all 0.2s',
-          }}
-          onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
-          onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
-        >
-          <Download size={16} />
-          Liberty Rider (.gpx)
-        </a>
+        {route.halves.map(h => (
+          <React.Fragment key={h.label}>
+            <a href={h.gpx} download title={h.detail}
+              style={{ display:'inline-flex', alignItems:'center', gap:10, padding:'13px 22px',
+                borderRadius:12, background:route.color, color:C.bg, fontFamily:C.sans,
+                fontSize:14, fontWeight:700, cursor:'pointer', textDecoration:'none',
+                boxShadow:`0 4px 24px ${route.color}40`, transition:'all 0.2s' }}
+              onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; }}
+              onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; }}>
+              <Download size={16} />
+              {h.label} (.gpx)
+            </a>
+            <a href={h.itn} download title="Même itinéraire au format TomTom, par câble USB"
+              style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'13px 16px',
+                borderRadius:12, background:'transparent', color:route.color,
+                border:`1.5px solid ${route.color}40`, fontFamily:C.mono, fontSize:12,
+                cursor:'pointer', textDecoration:'none', transition:'all 0.2s' }}
+              onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
+              onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}>
+              .itn
+            </a>
+          </React.Fragment>
+        ))}
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
-        GPX = NAVIGATION · 12 REPÈRES NUMÉROTÉS DANS L’ORDRE DE LA ROUTE<br />
-        DÉJEUNER, PLEIN ET OPTIONS NOMMÉS EN CLAIR · KM, HORAIRES ET TÉLÉPHONES EN DESCRIPTION<br />
+        MATIN + APRÈS-MIDI = L’ITINÉRAIRE À CHARGER · 99 ÉTAPES CHACUN, SOUS LE PLAFOND DE LIBERTY RIDER<br />
+        MÊMES FICHIERS POUR LE TOMTOM RIDER ET POUR LIBERTY RIDER, DONC MÊME TRACÉ<br />
         TRACE DE 1103 POINTS, SANS ÉTAPES NUMÉROTÉES PARASITES<br />
-        LIBERTY RIDER ET .ITN = MÊME ITINÉRAIRE, 94 ÉTAPES DONT 9 NOMMÉES · .ITN PAR USB<br />
-        PLAN.TOMTOM.COM N’IMPORTE QUE DU GPX ET IGNORE LES POINTS NOMMÉS<br />
+        TRACE COMPLÈTE = RÉFÉRENCE 1103 POINTS, POUR LES AUTRES OUTILS<br />
+        .ITN = MÊME ITINÉRAIRE, À COPIER SUR LE TOMTOM PAR USB<br />
         GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
       </div>
     </div>

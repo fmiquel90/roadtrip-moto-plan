@@ -82,16 +82,26 @@ const MARKERS = [
 
 const ROUTE_NAME = 'Argoat — Guerlédan & gorges du Daoulas';
 const GPX_OUTPUT_PATH = new URL('../public/trace.gpx', import.meta.url);
-const ITN_OUTPUT_PATH = new URL('../public/trace.itn', import.meta.url);
-const LIBERTY_OUTPUT_PATH = new URL('../public/liberty-rider.gpx', import.meta.url);
 
 // Liberty Rider importe un GPX dans son créateur d'itinéraire, mais recalcule
 // le chemin entre les points — son aide le dit, et conseille elle-même
 // « d'ajouter des étapes là où le tracé ne passe pas pour le forcer ». Elle
-// accepte jusqu'à 99 étapes ; on se cale juste en dessous.
-// Ce fichier ne contient qu'un <rte> : pas de <trk> ni de <wpt>, pour qu'il n'y
-// ait aucune ambiguïté sur ce que l'application doit reprendre.
-const LIBERTY_MAX_POINTS = 95;
+// accepte jusqu'à 99 étapes.
+// La boucle compte 175 intersections où l'on tourne, pour un plafond de 99
+// étapes : impossible de la clouer d'un seul tenant. Mesuré sur la trace, à
+// 2,5 km d'espacement un moteur de recalcul rend 214 km au lieu de 228, et à
+// 1,2 km il rend 221 km. La densité est donc bien le levier — il suffit de
+// couper la boucle en deux au déjeuner pour offrir ~99 étapes à chaque moitié
+// et retomber autour de 1,2 km d'espacement partout.
+//
+// C'est ce qui permet au TomTom Rider et à Liberty Rider de produire
+// pratiquement le même tracé : moins on leur laisse de liberté entre deux
+// étapes, moins leurs moteurs respectifs peuvent diverger.
+const HALF_MAX_POINTS = 99;
+const HALF_OUTPUT_PATHS = [
+  new URL('../public/argoat-1-matin.gpx', import.meta.url),
+  new URL('../public/argoat-2-apres-midi.gpx', import.meta.url),
+];
 
 // Le .itn est le format d'itinéraire propre à TomTom. Son intérêt ici : il
 // distingue les points de PASSAGE des points d'ARRÊT, ce que le GPX ne sait pas
@@ -106,7 +116,7 @@ const ITN_FLAG = { departure: 0, stop: 1, via: 2, destination: 3 };
 // GPX Liberty Rider : deux formats, un seul itinéraire. Le plafond suit donc
 // celui de Liberty Rider, le plus contraignant des deux (les TomTom anciens
 // s'arrêtaient à 48 points, les récents acceptent nettement plus).
-const ITN_MAX_POINTS = LIBERTY_MAX_POINTS;
+const ITN_MAX_POINTS = HALF_MAX_POINTS;
 
 // 'high' sur les deux : sur ce même tracé, passer de 'normal' à 'high' rallonge
 // nettement la part de voies communales sans coûter de temps.
@@ -405,11 +415,60 @@ function itineraryPoints({ points, shaping, labels }) {
       : { lat: p.latitude, lon: p.longitude, name: '', desc: '', stop: false };
   });
 
-  // L'arrivée est la dernière position, et une seule fois : sans ça elle
-  // figurait à l'avant-dernier rang, suivie d'un point anonyme au même endroit.
+  // Départ et arrivée sont épinglés aux deux extrémités, et une seule fois :
+  // sans ça l'arrivée figurait à l'avant-dernier rang suivie d'un point
+  // anonyme, et la moitié après-midi démarrait sur un point sans nom au lieu
+  // du déjeuner.
+  const departure = labels[0];
   seq = seq.filter((p, i) => !(p.name === arrival.name && i !== seq.length - 1));
+  seq = seq.filter((p, i) => !(p.name === departure.name && i !== 0));
+  seq[0] = { lat: departure.lat, lon: departure.lon, name: departure.name, desc: departure.desc, stop: true };
   seq[seq.length - 1] = { lat: arrival.lat, lon: arrival.lon, name: arrival.name, desc: arrival.desc, stop: true };
   return seq;
+}
+
+// Découpe l'itinéraire en deux moitiés au déjeuner, chacune sous le plafond
+// d'étapes de l'application. Le déjeuner est l'arrivée de la première et le
+// départ de la seconde, donc rien ne se perd à la jointure.
+function splitAtLunch({ route, rawPoints, labels }) {
+  const dense = buildShapingPoints(route, rawPoints, Number.MAX_SAFE_INTEGER);
+  const lunch = labels.find(s => s.role === 'lunch');
+  const cut = dense.offsets.findIndex(o => o / 1000 >= lunch.km);
+
+  const thin = (offsets, max) => {
+    const kept = [...offsets];
+    while (kept.length > max) {
+      let victim = -1, smallest = Infinity;
+      for (let i = 1; i < kept.length - 1; i++) {
+        const resulting = kept[i + 1] - kept[i - 1];
+        if (resulting < smallest) { smallest = resulting; victim = i; }
+      }
+      kept.splice(victim, 1);
+    }
+    return kept;
+  };
+
+  const halves = [dense.offsets.slice(0, cut + 1), dense.offsets.slice(cut)];
+  const index = new Map(dense.offsets.map((o, k) => [o, dense.points[k]]));
+
+  return halves.map((offsets, i) => {
+    const kept = thin(offsets, HALF_MAX_POINTS);
+    const usable = labels.filter(s => s.role !== 'food' && !s.backup);
+    const boundary = dense.offsets[cut] / 1000;
+    const own = usable.filter(s => (i === 0 ? s.km <= boundary + 0.001 : s.km > boundary + 0.001));
+
+    // Le déjeuner est la charnière : arrivée de la première moitié ET départ de
+    // la seconde. Il tombe pile sur la coupure, donc il faut l'y remettre à la
+    // main, sinon l'après-midi démarre sur l'arrêt suivant.
+    if (i === 1) own.unshift(lunch);
+
+    return {
+      name: i === 0 ? `${ROUTE_NAME} — 1. matin` : `${ROUTE_NAME} — 2. après-midi`,
+      points: kept.map(o => index.get(o)),
+      offsets: kept,
+      labels: own,
+    };
+  });
 }
 
 // GPX ne contenant qu'un <rte> : chaque point devient une étape dans le
@@ -528,31 +587,28 @@ async function main() {
 
   const labels = orderedWaypoints(trackPoints);
 
-  // Un seul jeu de points et un seul jeu d'arrêts pour les deux fichiers
-  // d'itinéraire : le GPX Liberty Rider et le .itn décrivent rigoureusement la
-  // même chose. Les replis en sont exclus — en faire des étapes enverrait
-  // l'appareil faire un détour vers chacune.
-  const libertyShaping = buildShapingPoints(route, allPoints, LIBERTY_MAX_POINTS);
+  // Les replis sont exclus de l'itinéraire — en faire des étapes enverrait
+  // l'appareil faire un détour vers chacune. Ils restent en <wpt> dans le GPX.
   const plannedLabels = labels.filter(s => s.role !== 'food' && !s.backup);
 
-  const itinerary = itineraryPoints({
-    points: libertyShaping.points, shaping: libertyShaping, labels: plannedLabels,
+  // Les deux moitiés : même fichier pour le TomTom Rider et pour Liberty Rider,
+  // donc le tracé le plus proche possible d'un appareil à l'autre.
+  const halves = splitAtLunch({ route, rawPoints: allPoints, labels: plannedLabels });
+  halves.forEach((half, i) => {
+    writeFileSync(HALF_OUTPUT_PATHS[i], buildLibertyGpx({
+      name: half.name, points: half.points, shaping: half, labels: half.labels,
+    }));
+    // Même moitié en .itn : le TomTom Rider peut ainsi rouler exactement le
+    // même itinéraire que le téléphone, arrêt pour arrêt.
+    writeFileSync(new URL(HALF_OUTPUT_PATHS[i].href.replace('.gpx', '.itn')),
+      buildItn({ routePoints: half.points, labels: half.labels, shaping: half }));
+    const gaps = half.offsets.slice(1).map((o, k) => o - half.offsets[k]);
+    const km = (half.offsets[half.offsets.length - 1] - half.offsets[0]) / 1000;
+    console.log(`\n${half.name} : ${HALF_OUTPUT_PATHS[i].pathname.split('/').pop()}`);
+    console.log(`  ${half.points.length} étapes · ${Math.round(km)} km · espacement moyen ` +
+      `${Math.round(gaps.reduce((a, b) => a + b, 0) / gaps.length)} m · ` +
+      `arrêts : ${half.labels.map(s => s.name.slice(0, 2)).join(' ')}`);
   });
-  writeFileSync(LIBERTY_OUTPUT_PATH, buildLibertyGpx({
-    name: ROUTE_NAME, points: libertyShaping.points, shaping: libertyShaping, labels: plannedLabels,
-  }));
-  console.log(`\nGPX Liberty Rider écrit : ${LIBERTY_OUTPUT_PATH.pathname}`);
-  console.log(`  ${itinerary.length} étapes (plafond de l'appli : 99), dont ` +
-    `${itinerary.filter(p => p.stop).length} nommées`);
-
-  const itn = buildItn({
-    routePoints: libertyShaping.points, labels: plannedLabels, shaping: libertyShaping,
-  });
-  writeFileSync(ITN_OUTPUT_PATH, itn);
-  const itnLines = itn.trim().split('\n');
-  const itnStops = itnLines.filter(l => !l.endsWith('|2|')).length;
-  console.log(`\nITN écrit : ${ITN_OUTPUT_PATH.pathname}`);
-  console.log(`  ${itnLines.length} points dont ${itnStops} arrêts annoncés, le reste en points de passage`);
 
   writeFileSync(GPX_OUTPUT_PATH, buildGpx({ name: ROUTE_NAME, trackPoints, routePoints, labels, shaping }));
   console.log(`\nGPX écrit : ${GPX_OUTPUT_PATH.pathname}`);

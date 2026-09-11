@@ -1,73 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="tomtom-scenic-route" xmlns="http://www.topografix.com/GPX/1/1">
-  <metadata><name>Argoat — Guerlédan &amp; gorges du Daoulas</name></metadata>
+  <metadata><name>Argoat — Guerlédan &amp; gorges du Daoulas — 2. après-midi</name></metadata>
   <rte>
-    <name>Argoat — Guerlédan &amp; gorges du Daoulas</name>
-    <rtept lat="48.5409784" lon="-2.4330858"><name>01 DEPART - Henansal</name><desc>km 0 · 9h00 · réservoir plein la veille</desc></rtept>
-    <rtept lat="48.51214" lon="-2.451"></rtept>
-    <rtept lat="48.49612" lon="-2.47296"></rtept>
-    <rtept lat="48.48175" lon="-2.49462"></rtept>
-    <rtept lat="48.47549" lon="-2.51019"></rtept>
-    <rtept lat="48.45904" lon="-2.53182"></rtept>
-    <rtept lat="48.44474" lon="-2.55221"></rtept>
-    <rtept lat="48.42609" lon="-2.56574"></rtept>
-    <rtept lat="48.40708" lon="-2.57762"></rtept>
-    <rtept lat="48.3891" lon="-2.59366"></rtept>
-    <rtept lat="48.37561" lon="-2.61377"></rtept>
-    <rtept lat="48.36142" lon="-2.63124"></rtept>
-    <rtept lat="48.35851" lon="-2.61603"></rtept>
-    <rtept lat="48.3559" lon="-2.57007"></rtept>
-    <rtept lat="48.3506" lon="-2.5498"><name>02 Mont Bel-Air</name><desc>km 34 · 9h43 · arrêt 25 min · panorama 339 m, aucun commerce</desc></rtept>
-    <rtept lat="48.33072" lon="-2.56364"></rtept>
-    <rtept lat="48.32235" lon="-2.58937"></rtept>
-    <rtept lat="48.31665" lon="-2.61807"></rtept>
-    <rtept lat="48.32546" lon="-2.63647"></rtept>
-    <rtept lat="48.32875" lon="-2.66151"></rtept>
-    <rtept lat="48.33579" lon="-2.6878"></rtept>
-    <rtept lat="48.32288" lon="-2.71355"></rtept>
-    <rtept lat="48.3115" lon="-2.73929"></rtept>
-    <rtept lat="48.30202" lon="-2.76706"></rtept>
-    <rtept lat="48.29484" lon="-2.79637"></rtept>
-    <rtept lat="48.28085" lon="-2.81868"></rtept>
-    <rtept lat="48.26776" lon="-2.85519"></rtept>
-    <rtept lat="48.25579" lon="-2.87277"></rtept>
-    <rtept lat="48.24112" lon="-2.88237"></rtept>
-    <rtept lat="48.25339" lon="-2.90201"></rtept>
-    <rtept lat="48.27755" lon="-2.90204"></rtept>
-    <rtept lat="48.2892" lon="-2.91977"></rtept>
-    <rtept lat="48.29953" lon="-2.91044"></rtept>
-    <rtept lat="48.3002" lon="-2.9012"><name>03 Cascade de Bosmeleac</name><desc>km 79 · 11h01 · arrêt 25 min · lac, barrage et aqueduc, aucun commerce</desc></rtept>
-    <rtept lat="48.30613" lon="-2.91215"></rtept>
-    <rtept lat="48.32178" lon="-2.9365"></rtept>
-    <rtept lat="48.30724" lon="-2.95712"></rtept>
-    <rtept lat="48.30839" lon="-2.98828"></rtept>
-    <rtept lat="48.29316" lon="-3.00102"></rtept>
-    <rtept lat="48.27233" lon="-3.01335"></rtept>
-    <rtept lat="48.25213" lon="-3.01242"></rtept>
-    <rtept lat="48.23886" lon="-3.03506"></rtept>
-    <rtept lat="48.2234" lon="-3.03645"></rtept>
+    <name>Argoat — Guerlédan &amp; gorges du Daoulas — 2. après-midi</name>
     <rtept lat="48.20593" lon="-3.04854"><name>04 DEJEUNER - L'Embarcadere</name><desc>km 105 · 12h11 · 1h15 · Beau Rivage, Caurel · 02 96 28 52 64 · samedi 9h-minuit, service continu</desc></rtept>
+    <rtept lat="48.20721" lon="-3.05191"></rtept>
+    <rtept lat="48.20771" lon="-3.05279"></rtept>
     <rtept lat="48.21798" lon="-3.06166"></rtept>
     <rtept lat="48.21549" lon="-3.03019"></rtept>
+    <rtept lat="48.21522" lon="-3.02685"></rtept>
+    <rtept lat="48.20994" lon="-3.01025"></rtept>
+    <rtept lat="48.20801" lon="-3.00714"></rtept>
     <rtept lat="48.1985" lon="-2.9871"><name>04 PLEIN - Intermarche Mur-de-Bretagne</name><desc>km 114 · samedi 9h-19h, ouvert 7j/7 · 980 m du tracé, crochet de 2 km A/R</desc></rtept>
+    <rtept lat="48.19769" lon="-3.00318"></rtept>
+    <rtept lat="48.19495" lon="-3.00893"></rtept>
+    <rtept lat="48.19293" lon="-3.009"></rtept>
     <rtept lat="48.18865" lon="-3.01291"></rtept>
+    <rtept lat="48.19089" lon="-3.01899"></rtept>
     <rtept lat="48.18762" lon="-3.01341"></rtept>
+    <rtept lat="48.17593" lon="-3.00864"></rtept>
+    <rtept lat="48.17852" lon="-3.01337"></rtept>
     <rtept lat="48.18124" lon="-3.01767"></rtept>
+    <rtept lat="48.18474" lon="-3.04058"></rtept>
     <rtept lat="48.19382" lon="-3.05743"></rtept>
     <rtept lat="48.19537" lon="-3.07474"></rtept>
+    <rtept lat="48.1968" lon="-3.07428"></rtept>
+    <rtept lat="48.20042" lon="-3.0696"></rtept>
+    <rtept lat="48.19348" lon="-3.0798"></rtept>
     <rtept lat="48.19389" lon="-3.08173"></rtept>
+    <rtept lat="48.19537" lon="-3.1029"></rtept>
     <rtept lat="48.1996" lon="-3.1268"><name>05 Forges des Salles</name><desc>km 132 · 14h17 · arrêt 40 min · village-usine du XVIIIe · samedi 14h-18h · 07 83 14 70 63</desc></rtept>
+    <rtept lat="48.19986" lon="-3.12946"></rtept>
+    <rtept lat="48.1997" lon="-3.1267"></rtept>
+    <rtept lat="48.20253" lon="-3.1291"></rtept>
     <rtept lat="48.2128" lon="-3.1282"><name>06 Abbaye de Bon-Repos</name><desc>km 136 · 15h07 · arrêt 20 min · ruines · Café de l'Abbaye 10h-19h 7j/7 · visite peut-être fermée le samedi, 02 96 24 82 20</desc></rtept>
+    <rtept lat="48.21212" lon="-3.12753"></rtept>
+    <rtept lat="48.21423" lon="-3.12706"></rtept>
+    <rtept lat="48.21535" lon="-3.12707"></rtept>
     <rtept lat="48.21724" lon="-3.12412"></rtept>
+    <rtept lat="48.22512" lon="-3.11334"></rtept>
     <rtept lat="48.22925" lon="-3.12307"></rtept>
+    <rtept lat="48.23227" lon="-3.12228"></rtept>
+    <rtept lat="48.24063" lon="-3.12418"></rtept>
+    <rtept lat="48.24174" lon="-3.12362"></rtept>
     <rtept lat="48.24443" lon="-3.12594"></rtept>
+    <rtept lat="48.25538" lon="-3.13678"></rtept>
     <rtept lat="48.25775" lon="-3.15489"></rtept>
     <rtept lat="48.27487" lon="-3.15695"></rtept>
     <rtept lat="48.29209" lon="-3.15918"></rtept>
     <rtept lat="48.30932" lon="-3.16268"></rtept>
+    <rtept lat="48.31018" lon="-3.16209"></rtept>
+    <rtept lat="48.31556" lon="-3.15987"></rtept>
+    <rtept lat="48.31556" lon="-3.15987"></rtept>
+    <rtept lat="48.31503" lon="-3.15436"></rtept>
     <rtept lat="48.31528" lon="-3.14039"></rtept>
     <rtept lat="48.31594" lon="-3.11057"></rtept>
     <rtept lat="48.32121" lon="-3.07982"></rtept>
+    <rtept lat="48.32185" lon="-3.05703"></rtept>
+    <rtept lat="48.32458" lon="-3.05303"></rtept>
     <rtept lat="48.32905" lon="-3.05112"></rtept>
     <rtept lat="48.34939" lon="-3.04717"></rtept>
     <rtept lat="48.36738" lon="-3.03789"></rtept>
@@ -76,6 +66,9 @@
     <rtept lat="48.39064" lon="-2.96332"></rtept>
     <rtept lat="48.3985" lon="-2.93455"></rtept>
     <rtept lat="48.4033" lon="-2.91"><name>07 Quintin</name><desc>km 178 · 16h28 · arrêt 40 min · cité de caractère · station U de repli à 545 m</desc></rtept>
+    <rtept lat="48.40532" lon="-2.90981"></rtept>
+    <rtept lat="48.40676" lon="-2.90825"></rtept>
+    <rtept lat="48.40932" lon="-2.90626"></rtept>
     <rtept lat="48.41882" lon="-2.89412"></rtept>
     <rtept lat="48.41312" lon="-2.86726"></rtept>
     <rtept lat="48.40827" lon="-2.83821"></rtept>
@@ -83,19 +76,30 @@
     <rtept lat="48.40243" lon="-2.78474"></rtept>
     <rtept lat="48.40531" lon="-2.76278"></rtept>
     <rtept lat="48.40288" lon="-2.7392"></rtept>
+    <rtept lat="48.3967" lon="-2.72725"></rtept>
+    <rtept lat="48.39718" lon="-2.72654"></rtept>
     <rtept lat="48.39997" lon="-2.72424"></rtept>
     <rtept lat="48.41027" lon="-2.70358"></rtept>
     <rtept lat="48.41712" lon="-2.67811"></rtept>
+    <rtept lat="48.41945" lon="-2.65277"></rtept>
     <rtept lat="48.41935" lon="-2.64846"></rtept>
     <rtept lat="48.425" lon="-2.62356"></rtept>
     <rtept lat="48.43428" lon="-2.6012"></rtept>
+    <rtept lat="48.43437" lon="-2.60028"></rtept>
     <rtept lat="48.43955" lon="-2.58077"></rtept>
+    <rtept lat="48.44647" lon="-2.56253"></rtept>
     <rtept lat="48.45125" lon="-2.5565"></rtept>
+    <rtept lat="48.46307" lon="-2.5562"></rtept>
+    <rtept lat="48.46892" lon="-2.5445"></rtept>
     <rtept lat="48.47085" lon="-2.53887"></rtept>
+    <rtept lat="48.47566" lon="-2.52283"></rtept>
+    <rtept lat="48.48299" lon="-2.5107"></rtept>
     <rtept lat="48.48424" lon="-2.5092"></rtept>
     <rtept lat="48.49994" lon="-2.49445"></rtept>
     <rtept lat="48.51778" lon="-2.48647"></rtept>
     <rtept lat="48.53367" lon="-2.47365"></rtept>
+    <rtept lat="48.54463" lon="-2.45776"></rtept>
+    <rtept lat="48.54243" lon="-2.43461"></rtept>
     <rtept lat="48.5409784" lon="-2.4330858"><name>08 ARRIVEE - Henansal</name><desc>km 228 · 18h09 · 229 km, 5h23 de roulage</desc></rtept>
   </rte>
 </gpx>
