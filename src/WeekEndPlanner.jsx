@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ExternalLink, Camera, Navigation, Clock, Map, Download, Fuel, Phone, Timer, Utensils } from 'lucide-react';
+import { MapPin, ExternalLink, Camera, Navigation, Clock, Download, Fuel, Phone, Timer, Utensils } from 'lucide-react';
 
 /* ─── Design tokens ─────────────────────────────────────────── */
 const C = {
@@ -37,16 +37,9 @@ const ROUTE = {
   color: '#34d399', colorDark: '#10b981',
   distance: '229 km', driveTime: '5h23', dayLength: '9h08',
   day: 'Samedi',
-  googleMapsUrl: 'https://www.google.com/maps/dir/48.5409784,-2.4330858/48.3506,-2.5498/48.3002,-2.9012/48.206,-3.047/48.1996,-3.1268/48.2128,-3.1282/48.4033,-2.91/48.5409784,-2.4330858',
-  gpxUrl: '/trace.gpx',
-  // Deux moitiés coupées au déjeuner : chacune sous le plafond de 99 étapes de
-  // Liberty Rider, donc assez dense pour que le TomTom Rider et le téléphone
-  // recalculent le même chemin. Mêmes fichiers pour les deux pilotes.
-  halves: [
-    { label: '1. Matin', gpx: '/argoat-1-matin.gpx', itn: '/argoat-1-matin.itn',
-      detail: '106 km · Hénansal → Bel-Air → Bosméléac → déjeuner' },
-    { label: '2. Après-midi', gpx: '/argoat-2-apres-midi.gpx', itn: '/argoat-2-apres-midi.itn',
-      detail: '123 km · déjeuner → plein → Forges → Bon-Repos → Quintin → Hénansal' },
+  files: [
+    { label: 'MATIN - GPX', url: '/matin.gpx' },
+    { label: 'APREM - GPX', url: '/aprem.gpx' },
   ],
   waypoints: [
     { name: 'Hénansal', type: 'start', time: '9h00', day: 'Départ', note: 'Réservoir plein' },
@@ -54,8 +47,8 @@ const ROUTE = {
       day: 'Panorama, 339 m', via: ['Moncontour'] },
     { name: 'Cascade de Bosméléac', type: 'stop', time: '11h01', ride: '53 min', pause: '25 min',
       day: 'Lac, barrage & aqueduc', via: ['Le Quillio'] },
-    { name: "L'Embarcadère", type: 'lunch', time: '12h11', ride: '45 min', pause: '1h15',
-      day: 'Déjeuner · Beau Rivage, Caurel', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
+    { name: 'Betty Food', type: 'lunch', time: '12h11', ride: '45 min', pause: '1h15',
+      day: 'Déjeuner · Le Mané, Caurel', via: ['Saint-Martin-des-Prés', 'Gorges du Poulancre'] },
     { name: 'Les Forges des Salles', type: 'stop', time: '14h17', ride: '51 min', pause: '40 min',
       day: 'Village-usine du XVIIIᵉ · samedi 14h-18h',
       // Arrêt technique 6 km après le déjeuner : pas une étape du rythme, mais il
@@ -86,18 +79,18 @@ const ROUTE = {
     { name: 'D44 (gorges du Daoulas)', km: '5,8 km' },
   ],
   lunch: [
+    { name: 'Betty Food', town: '3 Le Mané, 22530 Caurel',
+      hours: 'Samedi 11h — 23h', phone: '',
+      note: 'Snack au bord du lac. Rapide, sans réservation, sans créneau de service à tenir.',
+      query: 'Betty Food Caurel' },
     { name: "L'Embarcadère", town: 'Beau Rivage, 22530 Caurel',
       hours: 'Samedi 9h — minuit', phone: '02 96 28 52 64',
-      note: 'Au ponton des Vedettes de Guerlédan, les pieds dans le lac. Service continu.',
+      note: 'À 680 m, au ponton des Vedettes de Guerlédan. Si tu veux t’asseoir.',
       query: "Restaurant l'Embarcadère Beau Rivage Caurel" },
     { name: "Cap'Tain Cook", town: '56 Rue Roc Hell, 22530 Caurel',
       hours: 'Samedi 9h — 22h', phone: '02 96 67 11 00',
-      note: 'Sans façon, à 1,5 km du ponton.',
+      note: 'Repli, à 1,5 km.',
       query: "Cap'Tain Cook Caurel" },
-    { name: 'Betty Food', town: '3 Le Mané, 22530 Caurel',
-      hours: 'Samedi 11h — 23h', phone: '',
-      note: 'Snack, à 680 m. Si tu veux expédier le déjeuner et rouler plus.',
-      query: 'Betty Food Caurel' },
   ],
   lunchWarning: "À éviter : l'Auberge de Guerlédan ne sert que de 12h à 13h. Il y a aussi La Dame du Lac à 90 m du point de déjeuner, en bord d'eau — mais la base la classe en bar et ne donne aucun horaire, à tenter au 06 63 43 24 24. Horaires déclaratifs — appelle pour réserver.",
   coffee: { name: "Café de l'Abbaye", town: 'Bon-Repos-sur-Blavet', phone: '02 96 24 91 06',
@@ -255,75 +248,30 @@ const RouteBanner = ({ route }) => {
 
       {/* CTAs */}
       <div style={{ marginTop:20, display:'flex', gap:10, flexWrap:'wrap' }}>
-        <a
-          href={route.gpxUrl}
-          download
-          style={{
-            display:'inline-flex', alignItems:'center', gap:10,
-            padding:'13px 22px', borderRadius:12,
-            background:route.color, color:C.bg,
-            fontFamily:C.sans, fontSize:14, fontWeight:700,
-            cursor:'pointer', textDecoration:'none',
-            boxShadow:`0 4px 24px ${route.color}50`,
-            transition:'all 0.2s',
-          }}
-          onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; e.currentTarget.style.boxShadow=`0 6px 32px ${route.color}70`; }}
-          onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=`0 4px 24px ${route.color}50`; }}
-        >
-          <Download size={16} />
-          Trace complète (.gpx)
-        </a>
-        <a
-          href={route.googleMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display:'inline-flex', alignItems:'center', gap:10,
-            padding:'13px 22px', borderRadius:12,
-            background:'transparent', color:route.color,
-            border:`1.5px solid ${route.color}60`,
-            fontFamily:C.sans, fontSize:14, fontWeight:700,
-            cursor:'pointer', textDecoration:'none',
-            transition:'all 0.2s',
-          }}
-          onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
-          onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}
-        >
-          <Map size={16} />
-          Aperçu Google Maps
-          <ExternalLink size={13} style={{ opacity:0.7 }} />
-        </a>
-        {route.halves.map(h => (
-          <React.Fragment key={h.label}>
-            <a href={h.gpx} download title={h.detail}
-              style={{ display:'inline-flex', alignItems:'center', gap:10, padding:'13px 22px',
-                borderRadius:12, background:route.color, color:C.bg, fontFamily:C.sans,
-                fontSize:14, fontWeight:700, cursor:'pointer', textDecoration:'none',
-                boxShadow:`0 4px 24px ${route.color}40`, transition:'all 0.2s' }}
-              onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; }}
-              onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; }}>
-              <Download size={16} />
-              {h.label} (.gpx)
-            </a>
-            <a href={h.itn} download title="Même itinéraire au format TomTom, par câble USB"
-              style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'13px 16px',
-                borderRadius:12, background:'transparent', color:route.color,
-                border:`1.5px solid ${route.color}40`, fontFamily:C.mono, fontSize:12,
-                cursor:'pointer', textDecoration:'none', transition:'all 0.2s' }}
-              onMouseEnter={e=>{ e.currentTarget.style.background=`${route.color}14`; }}
-              onMouseLeave={e=>{ e.currentTarget.style.background='transparent'; }}>
-              .itn
-            </a>
-          </React.Fragment>
+        {route.files.map(f => (
+          <a
+            key={f.label}
+            href={f.url}
+            download
+            style={{
+              display:'inline-flex', alignItems:'center', gap:10,
+              padding:'13px 22px', borderRadius:12,
+              background:route.color, color:C.bg,
+              fontFamily:C.sans, fontSize:14, fontWeight:700,
+              cursor:'pointer', textDecoration:'none',
+              boxShadow:`0 4px 24px ${route.color}50`,
+              transition:'all 0.2s',
+            }}
+            onMouseEnter={e=>{ e.currentTarget.style.transform='translateY(-1px)'; e.currentTarget.style.boxShadow=`0 6px 32px ${route.color}70`; }}
+            onMouseLeave={e=>{ e.currentTarget.style.transform='translateY(0)'; e.currentTarget.style.boxShadow=`0 4px 24px ${route.color}50`; }}
+          >
+            <Download size={16} />
+            {f.label}
+          </a>
         ))}
       </div>
       <div style={{ marginTop:8, fontSize:10, color:C.muted, fontFamily:C.mono, letterSpacing:'0.1em', lineHeight:1.6 }}>
-        MATIN + APRÈS-MIDI = L’ITINÉRAIRE À CHARGER · 99 ÉTAPES CHACUN, SOUS LE PLAFOND DE LIBERTY RIDER<br />
-        MÊMES FICHIERS POUR LE TOMTOM RIDER ET POUR LIBERTY RIDER, DONC MÊME TRACÉ<br />
-        TRACE DE 1103 POINTS, SANS ÉTAPES NUMÉROTÉES PARASITES<br />
-        TRACE COMPLÈTE = RÉFÉRENCE 1103 POINTS, POUR LES AUTRES OUTILS<br />
-        .ITN = MÊME ITINÉRAIRE, À COPIER SUR LE TOMTOM PAR USB<br />
-        GOOGLE MAPS = APERÇU SEULEMENT · IL RECALCULE ENTRE LES ÉTAPES
+        DEUX FICHIERS GPX · MATIN PUIS APRÈS-MIDI, À CHARGER SÉPARÉMENT
       </div>
     </div>
   );
@@ -544,28 +492,18 @@ const SidebarInfoBlock = ({ route }) => {
       </div>
 
       {/* CTAs */}
-      <a href={route.gpxUrl} download
-        style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8,
-          width:'100%', padding:'12px 16px', borderRadius:10, background:route.color, color:C.bg,
-          fontFamily:C.sans, fontSize:13, fontWeight:700, cursor:'pointer', textDecoration:'none',
-          boxShadow:`0 2px 16px ${route.color}40`, transition:'opacity 0.2s' }}
-        onMouseEnter={e=>e.currentTarget.style.opacity='.82'}
-        onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
-        <Download size={14} />
-        Trace GPX
-      </a>
-      <a href={route.googleMapsUrl} target="_blank" rel="noopener noreferrer"
-        style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8,
-          width:'100%', padding:'12px 16px', borderRadius:10, background:'transparent', color:route.color,
-          border:`1.5px solid ${route.color}60`,
-          fontFamily:C.sans, fontSize:13, fontWeight:700, cursor:'pointer', textDecoration:'none',
-          marginTop:8, transition:'background 0.2s' }}
-        onMouseEnter={e=>e.currentTarget.style.background=`${route.color}14`}
-        onMouseLeave={e=>e.currentTarget.style.background='transparent'}>
-        <Map size={14} />
-        Aperçu Google Maps
-        <ExternalLink size={12} style={{ opacity:0.7 }} />
-      </a>
+      {route.files.map(f => (
+        <a key={f.label} href={f.url} download
+          style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+            width:'100%', padding:'12px 16px', borderRadius:10, background:route.color, color:C.bg,
+            fontFamily:C.sans, fontSize:13, fontWeight:700, cursor:'pointer', textDecoration:'none',
+            boxShadow:`0 2px 16px ${route.color}40`, marginBottom:8, transition:'opacity 0.2s' }}
+          onMouseEnter={e=>e.currentTarget.style.opacity='.82'}
+          onMouseLeave={e=>e.currentTarget.style.opacity='1'}>
+          <Download size={14} />
+          {f.label}
+        </a>
+      ))}
     </>
   );
 };
